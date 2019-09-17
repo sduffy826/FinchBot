@@ -27,6 +27,7 @@ def readFile(fileName):
         theList.append(aTuple)
         print(aLine.strip())
     print("Size of theList is: ", len(theList))
+    print("First element in first row: ", theList[0][0])
 
 start = time.time()
 writeFile("foo.txt")

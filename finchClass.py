@@ -1,9 +1,5 @@
-#import sys
-#sys.path.append('../../../FinchPython120')
-
 from finch import Finch 
 import time 
-from getkey import getkey, keys
 
 class MyRobot:
 
@@ -55,40 +51,3 @@ class MyRobot:
                 (self.finch.light()), (self.finch.obstacle()), \
                 (self.finch.acceleration()))
     return currStat
-
-def input_char(message):
-  print(message)
-  return getkey()
-
-
-myRobot = MyRobot(0.0, 0.0)
-
-ans = "l"
-while ans != 'q':
-  
-  ans = input_char("j-left, k-right, i-increase, l-stop, u-topspeed, spacebar-topspeed")
-  #time.sleep(1)
-  print("Response", ans)
-  theTime = time.time()
-  robotStat = myRobot.status()
-
-  print(time.time(), "Wheels: ", str(robotStat[0]), 
-                     "Temp: ", robotStat[1], 
-                     "lights: ", str(robotStat[2]), 
-                     "obstacles: ", str(robotStat[3]), 
-                     "accelerator:", str(robotStat[4]))
-
-  if ans is "j":
-    myRobot.left()
-  elif ans is "k":
-    myRobot.right()
-  elif ans is "i":
-    myRobot.faster()
-  elif ans is "l":
-    myRobot.stop()
-  elif ans is "u":
-    myRobot.run()
-
-myRobot.shutDown()
-
-time.sleep(1)
