@@ -29,9 +29,20 @@ while ans != 'q':
   print("Response", ans)
   theTime = time.time()
   robotStat = myRobot.status()
-
+  print(str(robotStat[3]).strip("()"))
   # Output data
-  outputStr = (theTime, robotStat)
+  #outputStr = theTime + "," + robotStat[0][0] + "," + robotStat[0][1] + "," + \
+  #            robotStat[1] + "," + \
+  #            robotStat[2][0] + "," + robotStat[2][1] + "," + \
+  #            robotStat[3][0] + "," + robotStat[3][1] + "," + \
+  #            robotStat[4][0] + "," + robotStat[4][1] + "," + robotStat[4][2] + "," + \
+  #            robotStat[4][3] + "," + robotStat[4][4] 
+  #outputStr = "foo"              
+  outputStr = theTime + "," + str(robotStat[0]).strip('()') + "," + \
+              robotStat[1] + "," + \
+              str(robotStat[2]).strip('()') + "," + \
+              str(robotStat[3]).strip('()') + "," + \
+              str(robotStat[4]).strip('()')
   fileHandle.write(str(outputStr))
   fileHandle.write('\n')
        
