@@ -1,5 +1,3 @@
-#import sys
-#sys.path.append('../../../FinchPython120')
 import finchClass
 import time 
 import datetime
@@ -11,16 +9,17 @@ def getLogFile():
   datetime_str = some_datetime_obj.isoformat()  # Convert to ISO 8601 string
   return "LogFile." + datetime_str
 
-
 def input_char(message):
   print(message)
   return getkey()
 
-myRobot = finchClass.MyRobot(0.0, 0.0)
+myRobot = finchClass.MyRobot(0.9, 0.9)
 
 currentLogFile = getLogFile()
 fileHandle     = open(currentLogFile,"at") # Append and text file
-  
+
+outputStr = "Time,L-Wheel,R-Wheel,Temp,L-Light,R-Light,L-Obst,R-Obst,x-Acc,y-Acc,z-Acc,Tap,Shake\n"
+fileHandle.write(outputStr)
 ans = "l"
 while ans != 'q':
   
@@ -29,21 +28,13 @@ while ans != 'q':
   print("Response", ans)
   theTime = time.time()
   robotStat = myRobot.status()
-  print(str(robotStat[3]).strip("()"))
-  # Output data
-  #outputStr = theTime + "," + robotStat[0][0] + "," + robotStat[0][1] + "," + \
-  #            robotStat[1] + "," + \
-  #            robotStat[2][0] + "," + robotStat[2][1] + "," + \
-  #            robotStat[3][0] + "," + robotStat[3][1] + "," + \
-  #            robotStat[4][0] + "," + robotStat[4][1] + "," + robotStat[4][2] + "," + \
-  #            robotStat[4][3] + "," + robotStat[4][4] 
-  #outputStr = "foo"              
-  outputStr = theTime + "," + str(robotStat[0]).strip('()') + "," + \
-              robotStat[1] + "," + \
+  
+  outputStr = str(theTime) + "," + str(robotStat[0]).strip('()') + "," + \
+              str(robotStat[1]) + "," + \
               str(robotStat[2]).strip('()') + "," + \
               str(robotStat[3]).strip('()') + "," + \
               str(robotStat[4]).strip('()')
-  fileHandle.write(str(outputStr))
+  fileHandle.write(outputStr)
   fileHandle.write('\n')
        
   print(time.time(), "Wheels: ", str(robotStat[0]), 
@@ -51,7 +42,6 @@ while ans != 'q':
                      "lights: ", str(robotStat[2]), 
                      "obstacles: ", str(robotStat[3]), 
                      "accelerator:", str(robotStat[4]))
-
   if ans is "j":
     myRobot.left()
   elif ans is "k":
