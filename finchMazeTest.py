@@ -1,5 +1,4 @@
-#import sys
-#sys.path.append('../../../FinchPython120')
+# Little program to test the finch and path's it'd take
 
 from finch import Finch 
 import finchClass
@@ -23,7 +22,20 @@ while len(targetPosition) > 0:
   currentPosition = currentPosition[positionOfCurrentPosition]
   
   # Calculate using the X axis as primary movement
+  print("Calculating path when traveling along X axis first")
   pathToUse = botUtils.calculateMovementToTarget(currentPosition,nextTarget,botUtils.X_PATH)
+  for movements in pathToUse:
+    print(str(movements))
+
+  # Calculate using the Y axis as primary movement
+  print("\nWhen going along Y axis first")
+  pathToUse = botUtils.calculateMovementToTarget(currentPosition,nextTarget,botUtils.Y_PATH)
+  for movements in pathToUse:
+    print(str(movements))
+
+  # Calculate using she shortest path
+  print("\nWhen going in straight line")
+  pathToUse = botUtils.calculateMovementToTarget(currentPosition,nextTarget,botUtils.DIRECT_PATH)
   for movements in pathToUse:
     print(str(movements))
 

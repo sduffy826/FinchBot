@@ -5,6 +5,7 @@ TURN = "T"
 X_PATH = "X"
 Y_PATH = "Y"
 DIRECT_PATH = "S"
+DEBUGIT = True
 
 # Helper to return cosine of degree angle.
 def degreesCos(theDegrees):
@@ -36,6 +37,8 @@ def getMinDegrees(fromPosition, toPosition):
   else:
     return possibleAngles[0]
 
+# Returns what the new orientation (your angle) would be after
+# the turn is applied
 def getNewOrientation(existingOrientation, amountTurned):
   if amountTurned < 0:
     # Turned to right
@@ -59,13 +62,65 @@ def calculateMovementToTarget(currentPosition, targetPosition, path2Use):
                                                                           str(targetPosition),path2Use))
   if path2Use == X_PATH:
     return calculateMovementToTargetUsingXAxis(currentPosition, targetPosition)
-  elif path2Use == Y_PATH:
-    print("Implement Y_PATH")
+  elif path2Use == Y_PATH: 
+    return calculateMovementToTargetUsingYAxis(currentPosition, targetPosition)
   elif path2Use == DIRECT_PATH:
-    print("Implement DIRECT_PATH")
+    return calculateMovenmentToTargetUsingDirectLine(currentPosition, targetPosition)
   else:
     print("Invalid path of {0}".format(path2Use))
   return []
+
+# Calculate the movement for a direct line from source to target
+def calculateMovenmentToTargetUsingDirectLine(startingPosition, endingPosition):
+  movement = []
+  # Determine angle to target
+  destAngleFromHere = calculateAngleToTarget(startingPosition, endingPosition[0], endingPosition[1])
+  # Calculate delta between angle we're at and were we want to be, turn to that (if need to)
+  deltaAngle = getMinDegrees(startingPosition[2],destAngleFromHere)
+  if deltaAngle != 0:
+    movement.append((TURN, deltaAngle))
+
+  # Calculate distance to target and move to it if need to
+  deltaDistance = calculateDistanceBetweenPoints(startingPosition,endingPosition)
+  if deltaDistance != 0:
+    movement.append((FORWARD,deltaDistance))
+  return movement
+
+# Calculate difference between two points 
+def calculateDistanceBetweenPoints(startPosition,endPosition):
+  deltaX = endPosition[0]-startPosition[0]
+  deltaY = endPosition[1]-startPosition[1]
+  return math.sqrt((deltaX*deltaX)+(deltaY*deltaY))
+
+# Calculate the angle required to get from the current position to the
+# desired point
+def calculateAngleToTarget(currentPosition, endX, endY):
+  xDelta = endX - currentPosition[0]
+  yDelta = endY - currentPosition[1]
+  arcTanVar = 0.0
+  if (xDelta == 0.0):
+    angle2GetThere = 90.0 
+  else:
+    if (yDelta != 0.0):
+      arcTanVar = (yDelta*1.0)/(xDelta*1.0)
+    
+    angle2GetThere = math.degrees(math.atan(abs(arcTanVar)))
+    if DEBUGIT:
+      print("xDelta: {0:.2f} yDelta: {1:.2f}  arcTan: {2:.4f}".format(xDelta,yDelta,arcTanVar))
+
+  if xDelta < 0:
+    if yDelta < 0:
+      angle2GetThere += 180.0
+    else:
+      angle2GetThere = 180.0 - angle2GetThere
+  else:
+    # X positive, if y negative then 4th quadrant and desired angle
+    # is 360 - calculated angle
+    if yDelta < 0:
+      angle2GetThere = 360 - angle2GetThere 
+  if DEBUGIT:
+    print("in calculateAngleToGetTarget, angle: {0:.2f}".format(angle2GetThere))
+  return angle2GetThere
 
 def calculatePerpendicularMovementToX(startX,startAngle,endX):
   # Calculate the degreee of angle to point toward X axis
@@ -149,37 +204,3 @@ def whatsNewPositionAfterMovements(currentPosition, movements):
       newPosition[0] = newPosition[0] + theMovement[1]*degreesCos(newPosition[2])
       newPosition[1] = newPosition[1] + theMovement[1]*degreesSin(newPosition[2])
   return tuple(newPosition)
-
-
-def oldCalculateMovementToTargetUsingXAxis(currentPos, targetPos):
-  moves = []
-  xUnits = targetPos[0] - currentPos[0]
-  yUnits = targetPos[1] - currentPos[1]
-
-  # Set angle to turn in X direction and move that many units
-  # (fyi: we pass xUnits which may be negative because it's also
-  # needed to calculate the current position)
-  if xUnits < 0:
-    xTargetAngle = 180
-  else:
-    xTargetAngle = 0
-  deltaAngle = getMinDegrees(currentPos[2],xTargetAngle)
-
-  if deltaAngle != 0:
-    # Orient to new angle
-    moves.append((TURN,deltaAngle)) 
-  
-  if xUnits != 0:
-    moves.append((FORWARD,xUnits))
-
-  # Calculate how to move in the y direction, similar to above
-  if yUnits < 0: 
-    targetAngle = 270
-  else:
-    targetAngle = 90
-  
-  deltaAngle = getMinDegrees(xTargetAngle,targetAngle)
-  moves.append((TURN,deltaAngle))
-  if yUnits != 0:
-    moves.append((FORWARD,yUnits))
-  return moves
