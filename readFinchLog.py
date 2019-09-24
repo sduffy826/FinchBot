@@ -1,8 +1,14 @@
+# This reads the logfile(s) created by the 'finchLog.py' program.
+# The original version of this was much more complicated than
+# what is is now (mainly cause the way the records were written).
+# See the older version in git around 9/24/2019 to look at it.
+
 import sys
 import os.path
 import glob
 import datetime
 import pythonUtils
+import math
 
 DEBUGIT = True
 
@@ -32,22 +38,13 @@ def readLogFile(inputFile):
   recCount = 0
   lastLine = ''
   for aLine in lines:
-    # Strip whitespace, and remove parens (from tuples)
-    aLine = aLine.strip().strip("()")
+    # Strip whitespace
+    aLine = aLine.strip()
     recCount += 1
     if DEBUGIT:
       print("Line read:", aLine)
-    if recCount == 1:
-      listOfLines = aLine.strip().split("Shake")
-      if len(listOfLines) > 0 and DEBUGIT:
-        print("Split header: ",aLine.strip())
-
-      theList.append(listOfLines[0]+"Shake")
-      currPos = 1
-      while currPos < len(listOfLines):
-        theList.append(listOfLines[currPos])
-        currPos += 1
-    elif len(aLine) > 0:
+    
+    if len(aLine) > 0:
       theList.append(aLine)
       lastLine = aLine
 
@@ -56,22 +53,52 @@ def readLogFile(inputFile):
     print("lastLine:{0}: arraySize:{1}:".format(lastLine,len(lastLineArray)))
 
   goodData = False
-  if len(lastLineArray) == 3: 
+  # Get the speed, it's the min of the two wheels (cause of adjustments)
+  theFinalSpeed = 0.0
+  rec2Check = len(theList) - 2
+  if rec2Check >= 0:
+    dumList = theList[rec2Check].split(",")
+    lWheel  = dumList[2]
+    rWheel  = dumList[3]
+    if pythonUtils.isFloat(lWheel) and pythonUtils.isFloat(rWheel):
+      theFinalSpeed = min(lWheel, rWheel)
+      goodData = True
+      
+  # Check the last line and calculate real distance and velocity
+  if len(lastLineArray) > 3 and goodData: 
+    goodData = False
     if DEBUGIT:
-      print("lastLineArray[0]:{0}: lastLineArray[1]:{1}: lastLineArray[2]:{2}:".format(lastLineArray[0],
-                                                                                       lastLineArray[1],lastLineArray[2]))
-    if lastLineArray[0] == "'EOF'" and pythonUtils.isFloat(lastLineArray[1]) and pythonUtils.isFloat(lastLineArray[2]):
-      totalDistance = float(lastLineArray[1])
-      deviationOffAxis = float(lastLineArray[2])
-      if (totalDistance > 0.0):
+      idx = 0
+      outString = ""
+      for lastLineElement in lastLineArray:
+        idx += 1
+        outString += " lastLineArray[{0}]: {1}".format(idx,lastLineElement)
+      print(outString.lstrip())
+
+    if lastLineArray[0] == "EOF" and pythonUtils.isFloat(lastLineArray[2]) and pythonUtils.isFloat(lastLineArray[6]):
+      xDistance        = float(lastLineArray[2])
+      elapsedTime      = float(lastLineArray[4])
+      deviationOffAxis = float(lastLineArray[6])
+      
+      if (xDistance > 0.0) and elapsedTime > 0.0:
         goodData = True
-      if DEBUGIT:
-        print("totalDistance:{0}: deviationOffAxis:{1}: goodData:{2}".format(totalDistance,deviationOffAxis,goodData))
+        calculatedDistance = math.sqrt(xDistance*xDistance + deviationOffAxis*deviationOffAxis)
+        velocity = calculatedDistance / elapsedTime
+        summaryRecord = "SUMMARY,xDistance,{0},yDistance,{1},totDistance,{2},elapsedTime,{3},wheelSpeed,{4},velocity,{5}".format(
+                            xDistance,deviationOffAxis,calculatedDistance,elapsedTime,theFinalSpeed,velocity)
+        if DEBUGIT:
+          print("\n\n"+summaryRecord+"\n\n")
+        theList.append(summaryRecord)
+
+      if DEBUGIT and goodData == False:
+        print("totalDistance:{0:.2f}: elapsedTime:{1:.2f} deviationOffAxis:{2:.2f}: goodData:{3}".format(xDistance,
+                                                                                     elapsedTime,deviationOffAxis,goodData))
   else:
     if DEBUGIT:
-      print("lastLineArray len not 3, it's:{0}:".format(len(lastLineArray)))
+      print("lastLineArray array len < 3, it's:{0}:".format(len(lastLineArray)))
 
-  if goodData == False:
+  if goodData == False and len(theList) > 0:
+    print("Clearing list")
     theList.clear()
 
   return theList
