@@ -17,11 +17,9 @@ class MyRobot:
   # it tries to make them in sync.
   def __init__(self, left, right, inAdjustmentMode=False):
     self.debugIt = True
-
     self.leftWheel  = left
     self.rightWheel = right
-  
-    self.finch = Finch()
+    self.myBot = Finch()
 
     # If true then wheel speed will be adjusted by the constants
     self.inWheelAdjustmentMode = inAdjustmentMode
@@ -54,9 +52,9 @@ class MyRobot:
       print("left: {0:.2f} right: {1:.2f}".format(self.wheelHelper("L"), self.wheelHelper("R") ))
 
     if (self.leftWheel != 0.0 or self.rightWheel != 0.0):
-      self.finch.wheels(self.wheelHelper("L"), self.wheelHelper("R"))
+      self.myBot.wheels(self.wheelHelper("L"), self.wheelHelper("R"))
     else:
-      self.finch.wheels(0.0,0.0)
+      self.myBot.wheels(0.0,0.0)
 
   def stop(self):
     self.leftWheel = 0.0
@@ -115,16 +113,18 @@ class MyRobot:
     self.update(self.inWheelAdjustmentMode)
 
   def shutDown(self):
-    self.finch.close()
+    self.myBot.close()
   
   def status(self):
     # This returns elapsed time since clock was set and a tuple with the attributes, the wheels, obstacle and lights
     # are tuples (so it's a tuple of tuples (except for temp))
+    leftObst, rightObst  = self.myBot.obstacle()
     currStat = (self.getElapsedTime(),
                 (self.wheelHelper("L",True), self.wheelHelper("R",True)),  
-                self.finch.temperature(),
-                (self.finch.light()), (self.finch.obstacle()),
-                (self.finch.acceleration()))
+                self.myBot.temperature(),
+                (self.myBot.light()),
+                (leftObst, rightObst),
+                (self.myBot.acceleration()))
     
     return currStat
     # comment below was up above

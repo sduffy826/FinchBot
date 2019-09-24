@@ -1,6 +1,7 @@
 __pycache__
 Logs/
 LogsOld/
+backupCode/
 *.pyc
 .DS_Store
 Finch Python API Description.pdf

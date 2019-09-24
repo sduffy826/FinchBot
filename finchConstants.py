@@ -1,6 +1,6 @@
 # CONSTANTS for the finch robot, these can be derived from testing (see finchLog)
 LEFTPOLARITY=1.0
-RIGHTPOLARITY=-1.0
+RIGHTPOLARITY=1.0
 
 LEFTWHEELADJUSTMENT=0.024
 RIGHTWHEELADJUSTMENT=0.0

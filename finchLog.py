@@ -20,9 +20,11 @@ fileHandle     = open(currentLogFile,"at") # Append and text file
 outputStr = "Time,Elapsed,L-Wheel,R-Wheel,Temp,L-Light,R-Light,L-Obst,R-Obst,x-Acc,y-Acc,z-Acc,Tap,Shake\n"
 fileHandle.write(outputStr)
 
-# Get robot, and have it start moving forward, the last parameter says to run in wheel
+# Get robot, and have it start moving0
+# forward, the last parameter says to run in wheel
 # adjustment mode to account for the different speeds of the wheels
-myRobot = finchClass.MyRobot(0.9, 0.9, True)
+myRobot = finchClass.MyRobot(0.0, 0.0, True)
+myFinch = myRobot.myRobot()
 
 ans = "l"
 while ans != 'q':
@@ -33,6 +35,8 @@ while ans != 'q':
   theTime = time.time()
   robotStat = myRobot.status()
   
+  print("\nObstacles {0}".format(str(myFinch.obstacle())))
+
   outputStr = str(theTime) + "," + \
               str(robotStat[finchClass.STAT_ELAPSED]) + "," + \
               str(robotStat[finchClass.STAT_WHEELS]).strip('()') + "," + \
