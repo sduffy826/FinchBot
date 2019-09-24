@@ -1,6 +1,7 @@
 import finchClass
 import time 
 import datetime
+import pythonUtils 
 
 from getkey import getkey, keys
 
@@ -13,13 +14,16 @@ def input_char(message):
   print(message)
   return getkey()
 
-myRobot = finchClass.MyRobot(0.9, 0.9)
-
 currentLogFile = getLogFile()
 fileHandle     = open(currentLogFile,"at") # Append and text file
 
-outputStr = "Time,L-Wheel,R-Wheel,Temp,L-Light,R-Light,L-Obst,R-Obst,x-Acc,y-Acc,z-Acc,Tap,Shake\n"
+outputStr = "Time,Elapsed,L-Wheel,R-Wheel,Temp,L-Light,R-Light,L-Obst,R-Obst,x-Acc,y-Acc,z-Acc,Tap,Shake\n"
 fileHandle.write(outputStr)
+
+# Get robot, and have it start moving forward, the last parameter says to run in wheel
+# adjustment mode to account for the different speeds of the wheels
+myRobot = finchClass.MyRobot(0.4, 0.4, True)
+
 ans = "l"
 while ans != 'q':
   
@@ -29,36 +33,46 @@ while ans != 'q':
   theTime = time.time()
   robotStat = myRobot.status()
   
-  outputStr = str(theTime) + "," + str(robotStat[0]).strip('()') + "," + \
-              str(robotStat[1]) + "," + \
-              str(robotStat[2]).strip('()') + "," + \
-              str(robotStat[3]).strip('()') + "," + \
-              str(robotStat[4]).strip('()')
+  outputStr = str(theTime) + "," + \
+              str(robotStat[finchClass.STAT_ELAPSED]) + "," + \
+              str(robotStat[finchClass.STAT_WHEELS]).strip('()') + "," + \
+              str(robotStat[finchClass.STAT_TEMP]) + "," + \
+              str(robotStat[finchClass.STAT_LIGHTS]).strip('()') + "," + \
+              str(robotStat[finchClass.STAT_OBSTACLE]).strip('()') + "," + \
+              str(robotStat[finchClass.STAT_ACCEL]).strip('()')
   fileHandle.write(outputStr)
   fileHandle.write('\n')
        
-  print(time.time(), "Wheels: ", str(robotStat[0]), 
-                     "Temp: ", robotStat[1], 
-                     "lights: ", str(robotStat[2]), 
-                     "obstacles: ", str(robotStat[3]), 
-                     "accelerator:", str(robotStat[4]))
+  print(time.time(), "Elapsed:", robotStat[finchClass.STAT_ELAPSED],
+                     "Wheels: ", str(robotStat[finchClass.STAT_WHEELS]), 
+                     "Temp: ", robotStat[finchClass.STAT_TEMP], 
+                     "lights: ", str(robotStat[finchClass.STAT_LIGHTS]), 
+                     "obstacles: ", str(robotStat[finchClass.STAT_OBSTACLE]), 
+                     "accelerator:", str(robotStat[finchClass.STAT_ACCEL]))
   if ans is "j":
     myRobot.left()
   elif ans is "k":
     myRobot.right()
-  elif ans is "i":
+  elif ans is "i":         
     myRobot.faster()
   elif ans is "l":
     myRobot.stop()
   elif ans is "u":
     myRobot.run()
 
+totalElapsedTime = myRobot.getElapsedTime()
 myRobot.shutDown()
 
-theLength = input("Enter distance travelled in inches")
-offCenter = input("Enter distance from center")
-outputStr = ("EOF",theLength,offCenter)
-fileHandle.write(str(outputStr))
+theLength = "L"
+while pythonUtils.isFloat(theLength) == False:
+  theLength = input("Enter distance travelled in inches: ")
+
+offCenter = "L"
+while pythonUtils.isFloat(offCenter) == False:
+  offCenter = input("Distance from center: ")
+
+outputStr = "EOF,TotalLength," + theLength + ",ElapsedTime," + str(totalElapsedTime) + ",OffsetFromAxis," + offCenter
+fileHandle.write(outputStr)
 fileHandle.close()
 
 time.sleep(0.5)

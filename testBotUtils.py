@@ -14,6 +14,8 @@ def testTurningAngles():
     angleChange = botUtils.getMinDegrees(startAngle,endAngle)
     checkEndAngle = botUtils.getNewOrientation(startAngle,angleChange)
     print("From: {0} to: {1} turn {2} you'll arrive at: {3}".format(startAngle,endAngle,angleChange,checkEndAngle))
+  
+  testAngleAndDistance2GetThere()  
 
 # Test calculating the angle between two points, and distance between them
 def testAngleAndDistance2GetThere():
@@ -37,4 +39,5 @@ def testAngleAndDistance2GetThere():
       distance = botUtils.calculateDistanceBetweenPoints(strt,aTarget)
       print("From: {0} to: ({1},{2}) is: {3} angle, distance: {4}".format(str(strt),x,y,theAngle,distance))
 
-testAngleAndDistance2GetThere()
+#testAngleAndDistance2GetThere()
+testTurningAngles()
