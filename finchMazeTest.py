@@ -2,14 +2,19 @@
 
 from finch import Finch 
 import finchClass
+import finchConstants
 import botUtils
 import time 
-from collections import deque
-from getkey import getkey, keys
 
-# This a stack, it has our current target location
+from collections import deque
+
+# from getkey import getkey, keys
+
+# This a stack, it has our current target location and the speed
+# we should use to get there
 targetPosition = deque()
-targetPosition.append((72.0, 6, 0.0)) 
+targetPosition.append((72.0, 6, 0.0, finchConstants.TOPSPEED))
+targetPosition.append((72.0, 6, 0.0, finchConstants.SLOWSPEED)) 
 
 # This just tracks where we have been, we start at the origin
 currentPosition = []
@@ -17,6 +22,7 @@ currentPosition.append((0.0,0,0,0.0))
 
 while len(targetPosition) > 0:
   nextTarget = targetPosition.pop()
+  speedToTravel = nextTarget[4]
 
   positionOfCurrentPosition = len(currentPosition)-1
   currentPosition = currentPosition[positionOfCurrentPosition]

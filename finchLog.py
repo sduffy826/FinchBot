@@ -22,7 +22,7 @@ fileHandle.write(outputStr)
 
 # Get robot, and have it start moving forward, the last parameter says to run in wheel
 # adjustment mode to account for the different speeds of the wheels
-myRobot = finchClass.MyRobot(0.4, 0.4, True)
+myRobot = finchClass.MyRobot(0.9, 0.9, True)
 
 ans = "l"
 while ans != 'q':

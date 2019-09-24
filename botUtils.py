@@ -181,6 +181,14 @@ def calculatePerpendicularMovementToY(startY,startAngle,endY):
 
 
 # ----------------------------------------------------------------------
+def calculateTimeToDistance(distance, speed):
+  if speed > 0.001:
+    return distance/speed
+  else:
+    return float("inf")
+
+
+# ----------------------------------------------------------------------
 # Helper to return cosine of degree angle.
 def degreesCos(theDegrees):
   return math.cos(math.radians(theDegrees))
