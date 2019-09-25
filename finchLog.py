@@ -23,8 +23,8 @@ fileHandle.write(outputStr)
 # Get robot, and have it start moving0
 # forward, the last parameter says to run in wheel
 # adjustment mode to account for the different speeds of the wheels
-myRobot = finchClass.MyRobot(0.0, 0.0, True)
-myFinch = myRobot.myRobot()
+myRobot = finchClass.MyRobot(0.7, 0.7, True)
+#myFinch = myRobot.myRobot()
 
 ans = "l"
 while ans != 'q':
@@ -35,8 +35,6 @@ while ans != 'q':
   theTime = time.time()
   robotStat = myRobot.status()
   
-  print("\nObstacles {0}".format(str(myFinch.obstacle())))
-
   outputStr = str(theTime) + "," + \
               str(robotStat[finchClass.STAT_ELAPSED]) + "," + \
               str(robotStat[finchClass.STAT_WHEELS]).strip('()') + "," + \

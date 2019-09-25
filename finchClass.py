@@ -29,13 +29,14 @@ class MyRobot:
   def wheelHelper(self, whichWheel, logModeOnly=False):
     # For logging we don't want to show the polarity adjustment... could be
     # confusing to people analyzing wheel motion :)
-    if logModeOnly==False:
+    if logModeOnly == False:
       rtPol = finchConstants.RIGHTPOLARITY
       ltPol = finchConstants.LEFTPOLARITY
     else:
       rtPol = 1.0
       ltPol = 1.0
-    if whichWheel=="R":
+
+    if whichWheel == "R":
       if self.inWheelAdjustmentMode:
         return (self.rightWheel+finchConstants.RIGHTWHEELADJUSTMENT)*rtPol
       else:
@@ -46,21 +47,25 @@ class MyRobot:
       else:
         return self.leftWheel*ltPol
 
+  # Set the wheel speed (to move, unless both are zero)
   def update(self, useAdjustment):
     self.inWheelAdjustmentMode = useAdjustment
-    if self.debugIt==True:
+    if self.debugIt == True:
       print("left: {0:.2f} right: {1:.2f}".format(self.wheelHelper("L"), self.wheelHelper("R") ))
 
     if (self.leftWheel != 0.0 or self.rightWheel != 0.0):
       self.myBot.wheels(self.wheelHelper("L"), self.wheelHelper("R"))
     else:
       self.myBot.wheels(0.0,0.0)
-
+  
+  # Stop moving
   def stop(self):
     self.leftWheel = 0.0
     self.rightWheel = 0.0
     self.update(False)
 
+  # Turn left, we do this by either increasing the speed of the right wheel
+  # or decreasing the left wheel speed if we're already at max speed
   def left(self):
     if self.rightWheel >= finchConstants.RIGHTMAXSPEED:
       self.leftWheel -= finchConstants.SPEEDINCREMENT
@@ -68,6 +73,7 @@ class MyRobot:
       self.rightWheel += finchConstants.SPEEDINCREMENT
     self.update(self.inWheelAdjustmentMode)
 
+  # Turn left for the desired degrees
   def leftTurn(self,degrees2Turn):
     self.turnTime = degrees2Turn/360.0
     self.leftWheel = finchConstants.LEFTROTATIONSPEED*-1
@@ -78,6 +84,8 @@ class MyRobot:
     self.rightWheel = 0
     self.update(False)
     
+  # Turn right, basically increase the speed of the left wheel
+  # or decreasing right wheel if left wheel already at max speed
   def right(self):
     if self.leftWheel >= finchConstants.LEFTMAXSPEED:
       self.rightWheel -= finchConstants.SPEEDINCREMENT
@@ -85,6 +93,7 @@ class MyRobot:
       self.leftWheel += finchConstants.SPEEDINCREMENT
     self.update(self.inWheelAdjustmentMode)
 
+  # Turn right the specified number of degrees
   def rightTurn(self, degrees2Turn):
     self.turnTime = degrees2Turn/360.0
     self.leftWheel  = finchConstants.RIGHTROTATIONSPEED
@@ -95,26 +104,49 @@ class MyRobot:
     self.rightWheel = 0
     self.update(False)
     
+  # Get the elapsed time
   def getElapsedTime(self):
     return round(time.time() - self.lasttime,4)
 
+  # Reset the elapsed timer
   def resetTimer(self):
     self.lasttime = time.time()
 
+  # Run... set wheels to max speed
   def run(self):
     self.leftWheel = finchConstants.LEFTMAXSPEED
     self.rightWheel = finchConstants.RIGHTMAXSPEED
     self.update(self.inWheelAdjustmentMode)
 
+  # Go faster, we determine the speed increment and increase both wheels by that amount
   def faster(self):
     increment = min(finchConstants.SPEEDINCREMENT, finchConstants.LEFTMAXSPEED-self.leftWheel, finchConstants.RIGHTMAXSPEED-self.rightWheel)
     self.leftWheel += increment
     self.rightWheel += increment
     self.update(self.inWheelAdjustmentMode)
 
+  # Set wheels to be at certain speed
+  def setWheels(self, lftWheel, rtWheel, adJustMode):
+    self.leftWheel = lftWheel
+    self.rightWheel = rtWheel
+    self.inWheelAdjustmentMode = adJustMode
+    self.update(self.inWheelAdjustmentMode)
+
+  # Shutdown the robot
   def shutDown(self):
     self.myBot.close()
   
+  # Return True if robot can move, false if there is some type of
+  # obstacle
+  def canMove(self):
+    # Put logic in here to see if you can move (i.e. no obstacles)
+    leftObst, rtObst = self.myBot.obstacle()
+    if leftObst or rtObst:
+      return False
+    else:
+      return True
+
+  # Return status of all robot attributes
   def status(self):
     # This returns elapsed time since clock was set and a tuple with the attributes, the wheels, obstacle and lights
     # are tuples (so it's a tuple of tuples (except for temp))

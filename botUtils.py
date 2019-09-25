@@ -229,13 +229,23 @@ def getNewOrientation(existingOrientation, amountTurned):
 # Determine what your new position would be after processing the
 # movements passed in.  (The currentPosition is a tuple (x, y, angle)
 def whatsNewPositionAfterMovements(currentPosition, movements):
+  holdPosition = currentPosition
+  for theMovement in movements:
+    holdPosition = whatsNewPositionAfterMovement(holdPosition,theMovement)
+  return holdPosition
+
+
+# ----------------------------------------------------------------------
+# Determine what your new position would be after processing the
+# movement passed in.  (The currentPosition is a tuple (x, y, angle)
+# the movement is also a tuple (i.e. ("F",32.0)
+def whatsNewPositionAfterMovement(currentPosition, theMovement):
   # Can't modify tuple so work with a list and convert back at end
   newPosition = list(currentPosition)
-  for theMovement in movements:
-    if theMovement[0] == TURN:
-      newPosition[2] = getNewOrientation(newPosition[2],theMovement[1])
-    elif theMovement[0] == FORWARD:
-      # x position is distance*cos(angle)
-      newPosition[0] = newPosition[0] + theMovement[1]*degreesCos(newPosition[2])
-      newPosition[1] = newPosition[1] + theMovement[1]*degreesSin(newPosition[2])
-  return tuple(newPosition)
+  if theMovement[0] == TURN:
+    newPosition[2] = getNewOrientation(newPosition[2],theMovement[1])
+  elif theMovement[0] == FORWARD:
+    # x position is distance*cos(angle)
+    newPosition[0] = newPosition[0] + theMovement[1]*degreesCos(newPosition[2])
+    newPosition[1] = newPosition[1] + theMovement[1]*degreesSin(newPosition[2])
+  return tuple(newPosition)  
