@@ -2,6 +2,9 @@ import math
 
 FORWARD = "F"
 TURN = "T"
+ROTATE = "R"
+BACKWARD = "B"
+
 X_PATH = "X"
 Y_PATH = "Y"
 DIRECT_PATH = "S"
@@ -178,6 +181,22 @@ def calculatePerpendicularMovementToY(startY,startAngle,endY):
   if yUnits != 0:
     y_moves.append((FORWARD,yUnits))
   return y_moves
+
+
+# ----------------------------------------------------------------------
+def calculateScrapeMovement(scrapeAngle, distanceToBackup):
+  # Calculate the degreee of angle to point toward Y axis
+  # and the distance you need to travel (note the distance is the
+  # value from startY so it can be negative)
+  scrape_moves = []
+  scrape_moves.append((ROTATE,scrapeAngle))
+  scrape_moves.append((BACKWARD,distanceToBackup))
+  scrape_moves.append((ROTATE,-scrapeAngle))
+
+  # Distance back is distanceTraveled * sinOfAngle
+  directionBack = distanceToBackup * degreesCos(abs(scrapeAngle))
+  scrape_moves.append((FORWARD, directionBack))
+  return scrape_moves
 
 
 # ----------------------------------------------------------------------

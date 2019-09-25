@@ -1,6 +1,6 @@
 # Little program to test the finch and path's it'd take
 
-from finch import Finch 
+#from finch import Finch 
 import finchClass
 import finchConstants
 import botUtils
@@ -10,41 +10,80 @@ from collections import deque
 
 # from getkey import getkey, keys
 
+myRobot = finchClass.MyRobot(0.0, 0.0, True)
+
 # This a stack, it has our current target location and the speed
 # we should use to get there
 targetPosition = deque()
 targetPosition.append((72.0, 6, 0.0, finchConstants.TOPSPEED))
-targetPosition.append((72.0, 6, 0.0, finchConstants.SLOWSPEED)) 
+targetPosition.append((68.0, 6.0, 0.0, finchConstants.SLOWSPEED)) 
 
 # This just tracks where we have been, we start at the origin
-currentPosition = []
-currentPosition.append((0.0,0,0,0.0))
+robotPositions = []
+robotPositions.append((0.0,0,0,0.0))
+
+for x in range(5):
+  print("")
+
+paths2Test = botUtils.X_PATH
+testObstaclesAndScrapes = True
 
 while len(targetPosition) > 0:
   nextTarget = targetPosition.pop()
-  speedToTravel = nextTarget[4]
+  speedToTravel = nextTarget[3]
 
-  positionOfCurrentPosition = len(currentPosition)-1
-  currentPosition = currentPosition[positionOfCurrentPosition]
-  
-  # Calculate using the X axis as primary movement
-  print("Calculating path when traveling along X axis first")
-  pathToUse = botUtils.calculateMovementToTarget(currentPosition,nextTarget,botUtils.X_PATH)
-  for movements in pathToUse:
-    print(str(movements))
+  positionOfCurrentPosition = len(robotPositions)-1
+  currentPosition = robotPositions[positionOfCurrentPosition]
 
-  # Calculate using the Y axis as primary movement
-  print("\nWhen going along Y axis first")
-  pathToUse = botUtils.calculateMovementToTarget(currentPosition,nextTarget,botUtils.Y_PATH)
-  for movements in pathToUse:
-    print(str(movements))
+  if paths2Test == "ALL" or paths2Test == botUtils.X_PATH:  
+    # Calculate using the X axis as primary movement
+    print("Calculating path when traveling along X axis first")
+    pathToUse = botUtils.calculateMovementToTarget(currentPosition,nextTarget,botUtils.X_PATH)
+    for movements in pathToUse:
+      print(str(movements))
 
-  # Calculate using she shortest path
-  print("\nWhen going in straight line")
-  pathToUse = botUtils.calculateMovementToTarget(currentPosition,nextTarget,botUtils.DIRECT_PATH)
-  for movements in pathToUse:
-    print(str(movements))
+  if paths2Test == "ALL" or paths2Test == botUtils.Y_PATH:  
+    # Calculate using the Y axis as primary movement
+    print("\nWhen going along Y axis first")
+    pathToUse = botUtils.calculateMovementToTarget(currentPosition,nextTarget,botUtils.Y_PATH)
+    for movements in pathToUse:
+      print(str(movements))
 
+  if paths2Test == "ALL" or paths2Test == botUtils.DIRECT_PATH:  
+    # Calculate using she shortest path
+    print("\nWhen going in straight line")
+    pathToUse = botUtils.calculateMovementToTarget(currentPosition,nextTarget,botUtils.DIRECT_PATH)
+    for movements in pathToUse:
+      print(str(movements))
+
+  # Calculate the new current position (we use movements from last one, but the endpoint should
+  # be the same for all)
+  robotPositions.append(botUtils.whatsNewPositionAfterMovements(currentPosition, pathToUse))
+
+  if testObstaclesAndScrapes:
+    # Check the obstacle and scrapes
+    pathToUse = myRobot.getOutOfObstacle(finchConstants.LEFT)
+    print("\n\nObstacle simulation, turning LEFT")
+    for movements in pathToUse:
+      print(str(movements))
+
+    # Check the obstacle and scrapes
+    pathToUse = myRobot.getOutOfObstacle(finchConstants.RIGHT)
+    print("\n\nObstacle simulation, turning RIGHT")
+    for movements in pathToUse:
+      print(str(movements))
+
+    # Check scrape on right
+    pathToUse = myRobot.getOutOfScrape(finchConstants.RIGHT)
+    print("\n\nObstacle simulation, scrap on right side")
+    for movements in pathToUse:
+      print(str(movements))      
+
+    # Check scrape on left
+    pathToUse = myRobot.getOutOfScrape(finchConstants.LEFT)
+    print("\n\nObstacle simulation, scrap on left side")
+    for movements in pathToUse:
+      print(str(movements))      
 
 
 

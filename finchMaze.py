@@ -1,6 +1,6 @@
 # Little program to test the finch and path's it'd take
 
-from finch import Finch 
+#from finch import Finch 
 import finchClass
 import finchConstants
 import botUtils
@@ -16,12 +16,12 @@ DEBUGIT = True
 # we should use to get there
 targetPosition = deque()
 targetPosition.append((72.0, 6.0, 0.0, finchConstants.TOPSPEED))
-targetPosition.append((68.0, 0.0, 0.0, finchConstants.SLOWSPEED)) 
+targetPosition.append((68.0, 6.0, 0.0, finchConstants.SLOWSPEED)) 
 #targetPosition.append((8.0, 6, 0.0, finchConstants.SLOWSPEED))
 #targetPosition.append((6.0, 0.0, 0.0, finchConstants.SLOWSPEED))
 # This just tracks where we have been, we start at the origin
-currentPosition = []
-currentPosition.append((0.0,0.0,0.0))
+robotPositions = []
+robotPositions.append((0.0,0.0,0.0))
 
 myRobot = finchClass.MyRobot(0.0, 0.0, True)
 
@@ -37,9 +37,9 @@ while len(targetPosition) > 0:
   wheelSpeed2Use    = nextTarget[3] 
   distancePerSecond = finchConstants.getSpeedPerSecond(wheelSpeed2Use)
  
-  # Current position is the last one in the currentPosition array
-  positionOfCurrentPosition = len(currentPosition)-1
-  currPos                   = currentPosition[positionOfCurrentPosition]
+  # Current position is the last one in the robotPositions array
+  positionOfCurrentPosition = len(robotPositions)-1
+  currPos                   = robotPositions[positionOfCurrentPosition]
  
   if DEBUGIT:
     print("Next target:{0} currPos{1}".format(str(nextTarget),str(currPos)))
@@ -74,7 +74,7 @@ while len(targetPosition) > 0:
       else:
         myRobot.leftTurn(theMovement[1])
       currPos = botUtils.whatsNewPositionAfterMovement(currPos, theMovement)
-      currentPosition.append(currPos)
+      robotPositions.append(currPos)
     elif theMovement[0] == botUtils.FORWARD:
       # Reset the timer, we need to keep track of how long we're traveling
       time2Target = (theMovement[1]/distancePerSecond)
@@ -93,7 +93,7 @@ while len(targetPosition) > 0:
       # so that we can call routine to calculate current position 
       actualMovement = (theMovement[0],(timeMoving * distancePerSecond))
       currPos        = botUtils.whatsNewPositionAfterMovement(currPos,actualMovement)
-      currentPosition.append(currPos)
+      robotPositions.append(currPos)
 
       if DEBUGIT:
         print("  Time moved:{0}  time2Target was:{1}".format(timeMoving,time2Target))
@@ -109,8 +109,8 @@ while len(targetPosition) > 0:
 myRobot.shutDown()
 
 if DEBUGIT:
-  print("Value of currentPositions")
-  for aPos in currentPosition:
+  print("Value of robotPositionss")
+  for aPos in robotPositions:
     print(str(aPos))
 
   # Calculate using the Y axis as primary movement

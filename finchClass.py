@@ -1,6 +1,7 @@
 from finch import Finch 
 import time 
 import finchConstants
+import botUtils
 
 STAT_ELAPSED = 0
 STAT_WHEELS = 1
@@ -145,6 +146,30 @@ class MyRobot:
       return False
     else:
       return True
+
+
+  # Routine when robot feels a scrap (obstacle on one side of it), pass in the side
+  def getOutOfScrape(self, sideOfScrape):
+    # Motion is rotate SCRAPEANGLE (if left +, right -)
+    # Backup SCRAPEBACKUPDISTANCE
+    # Rotate back to original angle
+    if sideOfScrape == finchConstants.LEFT:
+      return botUtils.calculateScrapeMovement(finchConstants.SCRAPEANGLE, finchConstants.SCRAPEBACKUPDISTANCE)
+    else:
+      return botUtils.calculateScrapeMovement(-finchConstants.SCRAPEANGLE, finchConstants.SCRAPEBACKUPDISTANCE)
+
+  # Get out of obstacle is similar to the get out of scrap but we use a 45 degree angle and the distance to
+  # move puts us back 1/2 of the robot's width away
+  def getOutOfObstacle(self, directionToMove):
+    # We want to try a position to the left or right that is 1/2 our width away
+    # Calculate the distance we need to backup first, it's 1/2 width divided by sin(45)
+    distanceToBackup = (finchConstants.TOTALWIDTH / 2) / botUtils.degreesSin(45)
+    if directionToMove == finchConstants.LEFT:
+      # Want angle of -45 to turn right then backup
+      return botUtils.calculateScrapeMovement(-45.0, distanceToBackup)
+    else:
+      return botUtils.calculateScrapeMovement(45, distanceToBackup)
+      
 
   # Return status of all robot attributes
   def status(self):
