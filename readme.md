@@ -1,8 +1,8 @@
 
 
 
-##Logic for obstacle
-{
+## Logic for obstacle
+```
   We keep track of the positionToTry (i.e. positionToTry = LEFT)
   We know our width (BOTWIDTH)
   We have different obstacles types (SCRAPE, OBSTACLE)
@@ -32,9 +32,9 @@
         moveForward adjacentLen
         calculate new position
         haveObstacle <- obstacle status
-}
-##When moving
-{
+```
+## When moving
+```
   If rightSensor triggered and not left one 
     " We're against right wall
     positionToTry = LEFT
@@ -47,4 +47,4 @@ If leftSensor triggered and not right one
 
 if both sensors triggered
   OBSTACLE = true
-}  
+```  
