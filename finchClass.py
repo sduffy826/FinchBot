@@ -23,11 +23,6 @@ class MyRobot:
     self.rightWheel = right
     self.myBot = Finch()
 
-    # If true then wheel speed will be adjusted by the constants
-    self.inWheelAdjustmentMode = inAdjustmentMode
-    self.lasttime = time.time()
-    self.update(self.inWheelAdjustmentMode)
-
     # Keep track of the direction you should try on obstacles
     self.obstacleDirectionToTry = finchConstants.LEFT
     self.lastScrapedSide = " "
@@ -42,6 +37,12 @@ class MyRobot:
       "rightStateTime" : 0.0,
       "rightElapsedTime" : 0.0
     }
+
+     # If true then wheel speed will be adjusted by the constants
+    self.inWheelAdjustmentMode = inAdjustmentMode
+    self.lasttime = time.time()
+    self.update(self.inWheelAdjustmentMode)
+
  
   # Reset the state of the sensors
   def resetState(self):
@@ -275,6 +276,8 @@ class MyRobot:
     # This returns elapsed time since clock was set and a tuple with the attributes, the wheels, obstacle and lights
     # are tuples (so it's a tuple of tuples (except for temp))
     leftObst, rightObst  = self.myBot.obstacle()
+    
+    print("leftObst: {0} rightObst: {1}".format(leftObst,rightObst))
     currStat = (self.getElapsedTime(),
                 (self.wheelHelper("L",True), self.wheelHelper("R",True)),  
                 self.myBot.temperature(),
