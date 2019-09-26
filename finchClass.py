@@ -2,6 +2,9 @@ from finch import Finch
 import time 
 import finchConstants
 import botUtils
+import logging
+
+logging.basicConfig(filename='finchRobot.log', level=logging.DEBUG)
 
 STAT_ELAPSED = 0
 STAT_WHEELS = 1
@@ -17,8 +20,6 @@ class MyRobot:
   # The 'adjust' variables are to adjust for different speeds in the wheels
   # it tries to make them in sync.
   def __init__(self, left, right, inAdjustmentMode=False):
-    self.debugIt = True
-    self.debugItState = False
     self.leftWheel  = left
     self.rightWheel = right
     self.myBot = Finch()
@@ -80,8 +81,7 @@ class MyRobot:
   # Helper to return indicator if an obstacle exists, we did this because we need the obstacle to
   # persist for an amount of time (thresholdInSecs) before we say it's on
   def hasObstacle(self,whichOne,thresholdInSecs=0.2):
-    if self.debugItState == True:
-      print("obstacleState:{0}".format(str(self.obstacleState)))
+    logging.debug("finchClass-hasObstacle, obstacleState:{0}".format(str(self.obstacleState)))
 
     leftObst = False
     if self.obstacleState["leftElapsedTime"] > thresholdInSecs:
@@ -90,8 +90,7 @@ class MyRobot:
     if self.obstacleState["rightElapsedTime"] > thresholdInSecs:
       rightObst = self.obstacleState["right"]
 
-    if self.debugItState == True:
-      print("in hasObstacle, leftObst:{0} rightObst{1}".format(leftObst,rightObst))
+    logging.debug("finchClass-hasObstacle, leftObst:{0} rightObst{1}".format(leftObst,rightObst))
 
     if whichOne == finchConstants.LEFT:
       return leftObst
@@ -126,8 +125,7 @@ class MyRobot:
   # Set the wheel speed (to move, unless both are zero)
   def update(self, useAdjustment):
     self.inWheelAdjustmentMode = useAdjustment
-    if self.debugIt == True:
-      print("left: {0:.2f} right: {1:.2f}".format(self.wheelHelper("L"), self.wheelHelper("R") ))
+    logging.debug("finchClass-update, left: {0:.2f} right: {1:.2f}".format(self.wheelHelper("L"), self.wheelHelper("R")))
 
     if (self.leftWheel != 0.0 or self.rightWheel != 0.0):
       # Setting wheel speed, reset the sensors

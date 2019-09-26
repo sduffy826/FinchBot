@@ -6,11 +6,30 @@ import finchConstants
 import botUtils
 import time 
 import pythonUtils
+import logging 
+import sys
 
 from collections import deque
 
-DEBUGIT = False
-DEBUGIT2 = False
+STEPTHRU = False
+
+logging.basicConfig(stream=sys.stdout, filename='finchRobot.log', level=logging.DEBUG)
+
+# file_handler = logging.FileHandler(filename='finchRobot.log')
+# stdout_handler = logging.StreamHandler(sys.stdout)
+# handlers = [file_handler, stdout_handler]
+
+# logging.basicConfig(
+#     level=logging.DEBUG, 
+#     format='[%(asctime)s] {%(filename)s:%(lineno)d} %(levelname)s - %(message)s',
+#     handlers=handlers
+#)
+
+# handler = logging.StreamHandler(sys.stdout)
+# handler.setLevel(logging.DEBUG)
+# formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+# handler.setFormatter(formatter)
+# root.addHandler(handler)
 
 smallTest = True
 
@@ -34,14 +53,14 @@ robotPositions.append((0.0,0.0,0.0))
 
 myRobot = finchClass.MyRobot(0.0, 0.0, True)
 
-for i in range(10):
-  print("\n")
+logging.info("finchMaze.py, Program started")
 
 # Enter while loop to process all the records that have the location
 # we should be moving to.
 while len(targetPosition) > 0:
   myRobot.setLedColor(finchConstants.GREEN)
-  if DEBUGIT:
+
+  if STEPTHRU:
     print("=============================================================================================================")
     dumbKey = pythonUtils.input_char("Debug mode, hit any key 'q' to quit")
     if dumbKey == "q":
@@ -57,19 +76,19 @@ while len(targetPosition) > 0:
   positionOfCurrentPosition = len(robotPositions)-1
   currPos                   = robotPositions[positionOfCurrentPosition]
  
-  if DEBUGIT:
-    print("Next target:{0} currPos{1}".format(str(nextTarget),str(currPos)))
+  logging.info("finchMaze.py. Next target:{0} currPos{1}".format(str(nextTarget),str(currPos)))
    
   # MAKE THIS A CONFIGURATION PARAMETER
   # Calculate using the X axis as primary movement
-  print("Calculating path when traveling along X axis first")
+  logging.debug("finchMaze.py, Calculating path when traveling along X axis first")
   pathToUse = botUtils.calculateMovementToTarget(currPos,nextTarget,botUtils.X_PATH)
 
-  if DEBUGIT:
-    print("Paths to use")
-    for aPath in pathToUse:
-      print("  {0}".format(str(aPath)))
-    dumbKey = pythonUtils.input_char("Debug mode, hit any key 'q' to quit")
+  logging.debug("finchMaze.py, paths to use below")
+  for aPath in pathToUse:
+    logging.debug("  {0}".format(str(aPath)))
+  
+  if STEPTHRU:
+    dumbKey = pythonUtils.input_char("Debug mode, about to make moves, hit any key 'q' to quit")
     if dumbKey == "q":
       break
 
@@ -86,8 +105,7 @@ while len(targetPosition) > 0:
     # Process each movement
     theMovement       = pathToUse[movementPosition]
     movementPosition += 1
-    if DEBUGIT:
-      print("Movement:{0} is:{1}".format(movementPosition,str(theMovement)))
+    logging.debug("finchMaze.py, Movement:{0} is:{1}".format(movementPosition,str(theMovement)))
 
     # Process turn movement or forward movement, only two kinds :) 
     if theMovement[botUtils.MOVEMENT_TYPE] == botUtils.TURN:
@@ -106,8 +124,7 @@ while len(targetPosition) > 0:
       # Reset the timer, we need to keep track of how long we're traveling
       time2Target = (theMovement[botUtils.MOVEMENT_VALUE]/distancePerSecond)
 
-      if DEBUGIT:
-        print("  wheelDirection:{0} time2Target{1:.2f} wheelSpeed2Use:{2:.2f}".format(wheelDirection,time2Target,wheelSpeed2Use))
+      logging.debug("finchMaze.py, wheelDirection:{0} time2Target{1:.2f} wheelSpeed2Use:{2:.2f}".format(wheelDirection,time2Target,wheelSpeed2Use))
 
       myRobot.resetTimer()
       myRobot.resetState()
@@ -117,8 +134,7 @@ while len(targetPosition) > 0:
       while True:
         timeMoving   = myRobot.getElapsedTime()
         robotCanMove = myRobot.canMove()
-        if DEBUGIT2:
-          print("  Looping, timeMoving:{0} robotCanMove:{1}".format(timeMoving,robotCanMove))
+        logging.debug("finchMaze.py,  Looping till movement done, timeMoving:{0} robotCanMove:{1}".format(timeMoving,robotCanMove))
         if timeMoving >= time2Target or robotCanMove == False:
           break
       myRobot.stop()
@@ -129,8 +145,7 @@ while len(targetPosition) > 0:
       currPos        = botUtils.whatsNewPositionAfterMovement(currPos,actualMovement)
       robotPositions.append(currPos)
 
-      if DEBUGIT:
-        print("  Time moved:{0}  time2Target was:{1}".format(timeMoving,time2Target))
+      logging.debug("finchMaze.py, time moved:{0}  time2Target was:{1}".format(timeMoving,time2Target))
 
       # If we didn't reach our target then we were unsuccessful
       if timeMoving < time2Target: 
@@ -147,13 +162,15 @@ while len(targetPosition) > 0:
             myRobot.setLedColor(finchConstants.RED)
             myRobot.checkAndSetObstacleDirectionToTry(currPos, robotRegion)
             pathToUse = myRobot.getOutOfObstacle(myRobot.getObstacleDirectionToTry())
+            logging.debug("finchMaze.py, Obstruction:OBSTACLE, path below")
           else:
             myRobot.setLedColor(finchConstants.BLUE)
             pathToUse = myRobot.getOutOfScrape(myRobot.getLastScrapeSide())
-          if DEBUGIT:
-            print("In Obstacle avoidance, the path selected will be")
-            for aMovement in pathToUse:
-              print(str(aMovement))
+            logging.debug("finchMaze.py, Obstruction:SCRAPE, path below")
+          
+          # Put out the path from the obstacle or scrape
+          for aMovement in pathToUse:
+            logging.debug("finchMaze.py,  {0}".format(str(aMovement)))
   
   if successfulMovements == False:
     # We weren't successful, put the target back onto the stack
@@ -161,7 +178,7 @@ while len(targetPosition) > 0:
 
 myRobot.shutDown()
 
-if DEBUGIT:
-  print("Value of robotPositionss")
-  for aPos in robotPositions:
-    print(str(aPos))
+logging.info("finchMaze.py, DONE")
+logging.debug("finchMaze.py, robot positions that were recorded are below")
+for aPos in robotPositions:
+  logging.debug("  {0}".format(str(aPos)))

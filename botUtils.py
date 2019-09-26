@@ -28,6 +28,9 @@ logging.basicConfig(filename='finchRobot.log', level=logging.DEBUG)
 def calculateAngleToTarget(currentPosition, endX, endY):
   xDelta = endX - currentPosition[POS_OF_X]
   yDelta = endY - currentPosition[POS_OF_Y]
+
+  logging.debug("boUtils-calculateAngleToTarget, xDelta: {0:.2f} yDelta: {1:.2f}".format(xDelta,yDelta))
+
   arcTanVar = 0.0
   if (xDelta == 0.0):
     angle2GetThere = 90.0 
@@ -36,8 +39,7 @@ def calculateAngleToTarget(currentPosition, endX, endY):
       arcTanVar = (yDelta*1.0)/(xDelta*1.0)
     
     angle2GetThere = round(math.degrees(math.atan(abs(arcTanVar))),0)
-    if DEBUGIT:
-      print("xDelta: {0:.2f} yDelta: {1:.2f}  arcTan: {2:.4f}".format(xDelta,yDelta,arcTanVar))
+    logging.debug("boUtils-calculateAngleToTarget, arcTan: {2:.4f}".format(arcTanVar))
 
   if xDelta < 0:
     if yDelta < 0:
@@ -49,8 +51,9 @@ def calculateAngleToTarget(currentPosition, endX, endY):
     # is 360 - calculated angle
     if yDelta < 0:
       angle2GetThere = 360 - angle2GetThere 
-  if DEBUGIT:
-    print("in calculateAngleToGetTarget, angle: {0:.2f}".format(angle2GetThere))
+
+  logging.debug("boUtils-calculateAngleToTarget,, angle: {0:.2f}".format(angle2GetThere))
+  
   return angle2GetThere
 
 
@@ -87,9 +90,8 @@ def calculateDistanceBetweenPoints(startPosition,endPosition):
 # It will return a list of tuples that defines how to get there, the tuple
 # returned has xDistance, yDistance, deltaAngle
 def calculateMovementToTarget(currentPosition, targetPosition, path2Use):
-  if DEBUGIT:
-    print("In calculateMovementToTarget, curr:{0} targ:{1} path:{2}".format(str(currentPosition),
-                                                                            str(targetPosition),path2Use))
+  logging.debug("boUtils-calculateMovementToTarget, curr:{0} targ:{1} path:{2}".format(str(currentPosition),
+                                                                                       str(targetPosition),path2Use))
   if path2Use == X_PATH:
     return calculateMovementToTargetUsingXAxis(currentPosition, targetPosition)
   elif path2Use == Y_PATH: 
@@ -97,7 +99,7 @@ def calculateMovementToTarget(currentPosition, targetPosition, path2Use):
   elif path2Use == DIRECT_PATH:
     return calculateMovementToTargetUsingDirectLine(currentPosition, targetPosition)
   else:
-    print("Invalid path of {0}".format(path2Use))
+    logging.error("Invalid path of {0}".format(path2Use))
   return []
 
 
@@ -125,23 +127,20 @@ def calculateMovementToTargetUsingXAxis(currentPos, targetPos):
   # current x position, current angle and the desired x position
   xMovements = calculatePerpendicularMovementToX(currentPos[POS_OF_X], currentPos[POS_OF_ANGLE], targetPos[POS_OF_X])
 
-  if DEBUGIT:
-    print("in calculateMovementToTargetUsingXAxis")
-    for aMove in xMovements:
-      print("  {0}".format(str(aMove)))
+  logging.debug("boUtils-calculateMovementToTargetUsingXAxis, (X Movment) values below")
+  for aMove in xMovements:
+    logging.debug("  {0}".format(str(aMove)))
 
   # We have the movements necessary to get there... determine what your new position
   # would be after it.. need that for determining next set of movements.
   tempPos = whatsNewPositionAfterMovements(currentPos, xMovements)
 
-  if DEBUGIT:
-    print("in calculateMovementToTargetUsingXAxis, newPos after that {0}".format(str(tempPos)))
+  logging.debug("boUtils-calculateMovementToTargetUsingXAxis, newPos after that {0}".format(str(tempPos)))
 
   yMovements = calculatePerpendicularMovementToY(tempPos[POS_OF_Y],tempPos[POS_OF_ANGLE],targetPos[POS_OF_Y])
-  if DEBUGIT:
-    print("in calculateMovementToTargetUsingXAxis")
-    for aMove in yMovements:
-      print("  {0}".format(str(aMove)))
+  logging.debug("boUtils-calculateMovementToTargetUsingXAxis, (Y Movement) values below")
+  for aMove in yMovements:
+    logging.debug("  {0}".format(str(aMove)))
 
 
   # Return the two lists concatenated together.
@@ -235,8 +234,10 @@ def calculateScrapeMovement(scrapeAngle, distanceToBackup):
 # given speed
 def calculateTimeToDistance(distance, speed):
   if speed > 0.001:
+    logging.debug("boUtils-calculateTimeToDistance, distance: {0} speed: {1} time: {2}".format(distance,speed,round(distance/speed,2)))
     return round(distance/speed,2)
   else:
+    logging.debug("boUtils-calculateTimeToDistance, distance: {0} speed: {1} time: {2}".format(distance,speed,"Infinity"))
     return float("inf")
 
 
