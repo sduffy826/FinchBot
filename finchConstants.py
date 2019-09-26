@@ -17,8 +17,8 @@ FASTSPEED=0.9
 TOPSPEED=1.0
 
 SCRAPESPEED=0.3
-SCRAPEANGLE=3.0
-SCRAPEBACKUPDISTANCE=1.0
+SCRAPEANGLE=20.0
+SCRAPEBACKUPDISTANCE=3.0
 
 SPEEDINCREMENT=0.1
 
@@ -36,4 +36,6 @@ LEFT="L"
 RIGHT="R"
 
 def getSpeedPerSecond(wheelVelocity):
-    return float(wheelVelocity * 14.0)
+  # The speed fluctuates... appears to go up
+  # by .2819 for each .1 increase in wheel speed
+  return float(((wheelVelocity-0.4)*2.819)+11.91)

@@ -8,8 +8,6 @@ import time
 
 from collections import deque
 
-# from getkey import getkey, keys
-
 myRobot = finchClass.MyRobot(0.0, 0.0, True)
 
 # This a stack, it has our current target location and the speed

@@ -1,4 +1,11 @@
 
+from getkey import getkey, keys
+
+# Prompt for a key from the user
+def input_char(message):
+  print(message)
+  return getkey()
+
 # Check if argument is a valid floating point number
 def isFloat(checkThis, debugIt=False):
   try:

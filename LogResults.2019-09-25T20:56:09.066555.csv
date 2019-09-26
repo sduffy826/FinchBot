@@ -1,0 +1,24 @@
+LogsNewRobot/LogFile.2019-09-24T20:28:41.284293,1,Time,Elapsed,L-Wheel,R-Wheel,Temp,L-Light,R-Light,L-Obst,R-Obst,x-Acc,y-Acc,z-Acc,Tap,Shake
+LogsNewRobot/LogFile.2019-09-24T20:28:41.284293,2,1569371336.226294,14.9302,0.42400000000000004, 0.4,-27.91666666666667,0.4745098039215686, 0.0,True, True,2.15, -0.15000000000000002, 0.75, True, True
+LogsNewRobot/LogFile.2019-09-24T20:28:41.284293,3,EOF,TotalLength,72,ElapsedTime,14.9513,OffsetFromAxis,-3
+LogsNewRobot/LogFile.2019-09-24T20:28:41.284293,4,SUMMARY,xDistance,72.0,yDistance,-3.0,totDistance,72.06247289678588,elapsedTime,14.9513,wheelSpeed, 0.4,velocity,4.819813186598214
+LogsNewRobot/LogFile.2019-09-24T20:30:55.568748,1,Time,Elapsed,L-Wheel,R-Wheel,Temp,L-Light,R-Light,L-Obst,R-Obst,x-Acc,y-Acc,z-Acc,Tap,Shake
+LogsNewRobot/LogFile.2019-09-24T20:30:55.568748,2,1569371463.7093172,8.1214,0.724, 0.7,-27.91666666666667,0.4745098039215686, 0.0,True, True,2.1, -0.25, 1.1, True, True
+LogsNewRobot/LogFile.2019-09-24T20:30:55.568748,3,EOF,TotalLength,72.5,ElapsedTime,8.1432,OffsetFromAxis,1.5
+LogsNewRobot/LogFile.2019-09-24T20:30:55.568748,4,SUMMARY,xDistance,72.5,yDistance,1.5,totDistance,72.51551558114994,elapsedTime,8.1432,wheelSpeed, 0.7,velocity,8.905039245155459
+LogsNewRobot/LogFile.2019-09-24T20:26:37.776074,1,Time,Elapsed,L-Wheel,R-Wheel,Temp,L-Light,R-Light,L-Obst,R-Obst,x-Acc,y-Acc,z-Acc,Tap,Shake
+LogsNewRobot/LogFile.2019-09-24T20:26:37.776074,2,1569371212.79809,15.0097,0.42400000000000004, 0.4,-27.91666666666667,0.4745098039215686, 0.0,True, True,2.1, 0.0, 1.05, True, True
+LogsNewRobot/LogFile.2019-09-24T20:26:37.776074,3,EOF,TotalLength,72,ElapsedTime,15.0314,OffsetFromAxis,0
+LogsNewRobot/LogFile.2019-09-24T20:26:37.776074,4,SUMMARY,xDistance,72.0,yDistance,0.0,totDistance,72.0,elapsedTime,15.0314,wheelSpeed, 0.4,velocity,4.78997298987453
+LogsNewRobot/LogFile.2019-09-24T20:27:29.832810,1,Time,Elapsed,L-Wheel,R-Wheel,Temp,L-Light,R-Light,L-Obst,R-Obst,x-Acc,y-Acc,z-Acc,Tap,Shake
+LogsNewRobot/LogFile.2019-09-24T20:27:29.832810,2,1569371264.749705,14.8991,0.42400000000000004, 0.4,-27.91666666666667,0.4745098039215686, 0.0,True, True,2.15, 0.0, 1.0, True, True
+LogsNewRobot/LogFile.2019-09-24T20:27:29.832810,3,EOF,TotalLength,69,ElapsedTime,14.9193,OffsetFromAxis,-3
+LogsNewRobot/LogFile.2019-09-24T20:27:29.832810,4,SUMMARY,xDistance,69.0,yDistance,-3.0,totDistance,69.06518659932803,elapsedTime,14.9193,wheelSpeed, 0.4,velocity,4.629251144445653
+LogsNewRobot/LogFile.2019-09-24T20:25:30.062110,1,Time,Elapsed,L-Wheel,R-Wheel,Temp,L-Light,R-Light,L-Obst,R-Obst,x-Acc,y-Acc,z-Acc,Tap,Shake
+LogsNewRobot/LogFile.2019-09-24T20:25:30.062110,2,1569371145.329511,15.2505,0.42400000000000004, 0.4,-27.91666666666667,0.4745098039215686, 0.0,True, False,2.2, 0.0, 0.05, False, False
+LogsNewRobot/LogFile.2019-09-24T20:25:30.062110,3,EOF,TotalLength,72,ElapsedTime,15.271,OffsetFromAxis,15
+LogsNewRobot/LogFile.2019-09-24T20:25:30.062110,4,SUMMARY,xDistance,72.0,yDistance,15.0,totDistance,73.54590403278758,elapsedTime,15.271,wheelSpeed, 0.4,velocity,4.816050293549052
+LogsNewRobot/LogFile.2019-09-24T20:29:54.278518,1,Time,Elapsed,L-Wheel,R-Wheel,Temp,L-Light,R-Light,L-Obst,R-Obst,x-Acc,y-Acc,z-Acc,Tap,Shake
+LogsNewRobot/LogFile.2019-09-24T20:29:54.278518,2,1569371402.487881,8.1942,0.724, 0.7,-27.91666666666667,0.47058823529411764, 0.0,True, True,2.2, 0.15000000000000002, 1.0, False, False
+LogsNewRobot/LogFile.2019-09-24T20:29:54.278518,3,EOF,TotalLength,72,ElapsedTime,8.2154,OffsetFromAxis,15
+LogsNewRobot/LogFile.2019-09-24T20:29:54.278518,4,SUMMARY,xDistance,72.0,yDistance,15.0,totDistance,73.54590403278758,elapsedTime,8.2154,wheelSpeed, 0.7,velocity,8.952200018597702

@@ -2,7 +2,6 @@ import math
 
 FORWARD = "F"
 TURN = "T"
-ROTATE = "R"
 BACKWARD = "B"
 
 X_PATH = "X"
@@ -10,13 +9,22 @@ Y_PATH = "Y"
 DIRECT_PATH = "S"
 DEBUGIT = True
 
+MINANGLETOTURN=3.0
+MINDISTANCETOTRAVEL=0.5
+POS_OF_X=0
+POS_OF_Y=1
+POS_OF_ANGLE=2
+
+# For movements
+MOVEMENT_TYPE=0
+MOVEMENT_VALUE=1
 
 # ----------------------------------------------------------------------
 # Calculate the angle required to get from the current position to the
 # desired point
 def calculateAngleToTarget(currentPosition, endX, endY):
-  xDelta = endX - currentPosition[0]
-  yDelta = endY - currentPosition[1]
+  xDelta = endX - currentPosition[POS_OF_X]
+  yDelta = endY - currentPosition[POS_OF_Y]
   arcTanVar = 0.0
   if (xDelta == 0.0):
     angle2GetThere = 90.0 
@@ -24,7 +32,7 @@ def calculateAngleToTarget(currentPosition, endX, endY):
     if (yDelta != 0.0):
       arcTanVar = (yDelta*1.0)/(xDelta*1.0)
     
-    angle2GetThere = math.degrees(math.atan(abs(arcTanVar)))
+    angle2GetThere = round(math.degrees(math.atan(abs(arcTanVar))),0)
     if DEBUGIT:
       print("xDelta: {0:.2f} yDelta: {1:.2f}  arcTan: {2:.4f}".format(xDelta,yDelta,arcTanVar))
 
@@ -58,9 +66,9 @@ def calculateDegrees(fromPosition, toPosition):
 # ----------------------------------------------------------------------
 # Calculate difference between two points 
 def calculateDistanceBetweenPoints(startPosition,endPosition):
-  deltaX = endPosition[0]-startPosition[0]
-  deltaY = endPosition[1]-startPosition[1]
-  return math.sqrt((deltaX*deltaX)+(deltaY*deltaY))
+  deltaX = endPosition[POS_OF_X]-startPosition[POS_OF_X]
+  deltaY = endPosition[POS_OF_Y]-startPosition[POS_OF_Y]
+  return round(math.sqrt((deltaX*deltaX)+(deltaY*deltaY)),2)
 
 
 # ----------------------------------------------------------------------
@@ -76,14 +84,15 @@ def calculateDistanceBetweenPoints(startPosition,endPosition):
 # It will return a list of tuples that defines how to get there, the tuple
 # returned has xDistance, yDistance, deltaAngle
 def calculateMovementToTarget(currentPosition, targetPosition, path2Use):
-  print("In calculateMovementToTarget, curr:{0} targ:{1} path:{2}".format(str(currentPosition),
-                                                                          str(targetPosition),path2Use))
+  if DEBUGIT:
+    print("In calculateMovementToTarget, curr:{0} targ:{1} path:{2}".format(str(currentPosition),
+                                                                            str(targetPosition),path2Use))
   if path2Use == X_PATH:
     return calculateMovementToTargetUsingXAxis(currentPosition, targetPosition)
   elif path2Use == Y_PATH: 
     return calculateMovementToTargetUsingYAxis(currentPosition, targetPosition)
   elif path2Use == DIRECT_PATH:
-    return calculateMovenmentToTargetUsingDirectLine(currentPosition, targetPosition)
+    return calculateMovementToTargetUsingDirectLine(currentPosition, targetPosition)
   else:
     print("Invalid path of {0}".format(path2Use))
   return []
@@ -91,18 +100,18 @@ def calculateMovementToTarget(currentPosition, targetPosition, path2Use):
 
 # ----------------------------------------------------------------------
 # Calculate the movement for a direct line from source to target
-def calculateMovenmentToTargetUsingDirectLine(startingPosition, endingPosition):
+def calculateMovementToTargetUsingDirectLine(startingPosition, endingPosition):
   movement = []
   # Determine angle to target
-  destAngleFromHere = calculateAngleToTarget(startingPosition, endingPosition[0], endingPosition[1])
+  destAngleFromHere = calculateAngleToTarget(startingPosition, endingPosition[POS_OF_X], endingPosition[POS_OF_Y])
   # Calculate delta between angle we're at and were we want to be, turn to that (if need to)
-  deltaAngle = getMinDegrees(startingPosition[2],destAngleFromHere)
-  if deltaAngle != 0:
+  deltaAngle = getMinDegrees(startingPosition[POS_OF_ANGLE],destAngleFromHere)
+  if abs(deltaAngle) > MINANGLETOTURN:
     movement.append((TURN, deltaAngle))
 
   # Calculate distance to target and move to it if need to
   deltaDistance = calculateDistanceBetweenPoints(startingPosition,endingPosition)
-  if deltaDistance != 0:
+  if abs(deltaDistance) > MINDISTANCETOTRAVEL:
     movement.append((FORWARD,deltaDistance))
   return movement
 
@@ -111,13 +120,26 @@ def calculateMovenmentToTargetUsingDirectLine(startingPosition, endingPosition):
 def calculateMovementToTargetUsingXAxis(currentPos, targetPos):  
   # Get the movements necessary to get to the target x position, we pass in the
   # current x position, current angle and the desired x position
-  xMovements = calculatePerpendicularMovementToX(currentPos[0], currentPos[2], targetPos[0])
+  xMovements = calculatePerpendicularMovementToX(currentPos[POS_OF_X], currentPos[POS_OF_ANGLE], targetPos[POS_OF_X])
+
+  if DEBUGIT:
+    print("in calculateMovementToTargetUsingXAxis")
+    for aMove in xMovements:
+      print("  {0}".format(str(aMove)))
 
   # We have the movements necessary to get there... determine what your new position
   # would be after it.. need that for determining next set of movements.
   tempPos = whatsNewPositionAfterMovements(currentPos, xMovements)
 
-  yMovements = calculatePerpendicularMovementToY(tempPos[1],tempPos[2],targetPos[1])
+  if DEBUGIT:
+    print("in calculateMovementToTargetUsingXAxis, newPos after that {0}".format(str(tempPos)))
+
+  yMovements = calculatePerpendicularMovementToY(tempPos[POS_OF_Y],tempPos[POS_OF_ANGLE],targetPos[POS_OF_Y])
+  if DEBUGIT:
+    print("in calculateMovementToTargetUsingXAxis")
+    for aMove in yMovements:
+      print("  {0}".format(str(aMove)))
+
 
   # Return the two lists concatenated together.
   return xMovements+yMovements
@@ -127,11 +149,11 @@ def calculateMovementToTargetUsingXAxis(currentPos, targetPos):
 def calculateMovementToTargetUsingYAxis(currentPos, targetPos):  
   # This is similar to calculateMovementToTargetUsingXAxis except it moves along the Y
   # axis first.
-  yMovements = calculatePerpendicularMovementToY(currentPos[1],currentPos[2],targetPos[1])
+  yMovements = calculatePerpendicularMovementToY(currentPos[POS_OF_Y],currentPos[POS_OF_ANGLE],targetPos[POS_OF_Y])
   # Get new position
   tempPos = whatsNewPositionAfterMovements(currentPos, yMovements)
   # Get xMovements
-  xMovements = calculatePerpendicularMovementToX(tempPos[0], tempPos[2], targetPos[0])
+  xMovements = calculatePerpendicularMovementToX(tempPos[POS_OF_X], tempPos[POS_OF_ANGLE], targetPos[POS_OF_X])
 
   # Return the two lists concatenated together.
   return yMovements+xMovements
@@ -151,11 +173,11 @@ def calculatePerpendicularMovementToX(startX,startAngle,endX):
   else:
     targetAngle = 0
   
-  deltaAngle = getMinDegrees(startAngle,targetAngle)
-  # If angle needs to be changed then log the movememtn
-  if deltaAngle != 0.0:
-    x_moves.append((TURN,deltaAngle))
-  if xUnits != 0:
+  if abs(xUnits) > MINDISTANCETOTRAVEL:
+    deltaAngle = getMinDegrees(startAngle,targetAngle)
+    # If angle needs to be changed then log the movememtn
+    if abs(deltaAngle) > MINANGLETOTURN:
+      x_moves.append((TURN,deltaAngle))
     x_moves.append((FORWARD,xUnits))
   return x_moves
 
@@ -174,11 +196,11 @@ def calculatePerpendicularMovementToY(startY,startAngle,endY):
   else:
     targetAngle = 90
   
-  deltaAngle = getMinDegrees(startAngle,targetAngle)
-  # If angle needs to be changed then log the movememtn
-  if deltaAngle != 0.0:
-    y_moves.append((TURN,deltaAngle))
-  if yUnits != 0:
+  if abs(yUnits) > MINDISTANCETOTRAVEL:
+    deltaAngle = getMinDegrees(startAngle,targetAngle)
+    # If angle needs to be changed then log the movememtn
+    if abs(deltaAngle) > MINANGLETOTURN:
+      y_moves.append((TURN,deltaAngle))
     y_moves.append((FORWARD,yUnits))
   return y_moves
 
@@ -189,20 +211,26 @@ def calculateScrapeMovement(scrapeAngle, distanceToBackup):
   # and the distance you need to travel (note the distance is the
   # value from startY so it can be negative)
   scrape_moves = []
-  scrape_moves.append((ROTATE,scrapeAngle))
+  scrape_moves.append((TURN,scrapeAngle))
   scrape_moves.append((BACKWARD,distanceToBackup))
-  scrape_moves.append((ROTATE,-scrapeAngle))
+  scrape_moves.append((TURN,-scrapeAngle))
 
   # Distance back is distanceTraveled * sinOfAngle
-  directionBack = distanceToBackup * degreesCos(abs(scrapeAngle))
-  scrape_moves.append((FORWARD, directionBack))
+
+  # Found it's better to not move back to the starting postion for now...
+  # We're oriented in correct direction so staying back allows time
+  # for sensors to get re-oriented
+  directionBack = round(distanceToBackup * degreesCos(abs(scrapeAngle)),2)
+  #scrape_moves.append((FORWARD, directionBack))
   return scrape_moves
 
 
 # ----------------------------------------------------------------------
+# Calculate how long it will take to travel a given distance at a
+# given speed
 def calculateTimeToDistance(distance, speed):
   if speed > 0.001:
-    return distance/speed
+    return round(distance/speed,2)
   else:
     return float("inf")
 
@@ -261,10 +289,14 @@ def whatsNewPositionAfterMovements(currentPosition, movements):
 def whatsNewPositionAfterMovement(currentPosition, theMovement):
   # Can't modify tuple so work with a list and convert back at end
   newPosition = list(currentPosition)
-  if theMovement[0] == TURN:
-    newPosition[2] = getNewOrientation(newPosition[2],theMovement[1])
-  elif theMovement[0] == FORWARD:
+  if theMovement[MOVEMENT_TYPE] == TURN:
+    newPosition[POS_OF_ANGLE] = getNewOrientation(newPosition[POS_OF_ANGLE],theMovement[MOVEMENT_VALUE])
+  elif theMovement[MOVEMENT_TYPE] == FORWARD:
     # x position is distance*cos(angle)
-    newPosition[0] = newPosition[0] + theMovement[1]*degreesCos(newPosition[2])
-    newPosition[1] = newPosition[1] + theMovement[1]*degreesSin(newPosition[2])
+    newPosition[POS_OF_X] = round(newPosition[POS_OF_X] + theMovement[MOVEMENT_VALUE]*degreesCos(newPosition[POS_OF_ANGLE]),2)
+    newPosition[POS_OF_Y] = round(newPosition[POS_OF_Y] + theMovement[POS_OF_Y]*degreesSin(newPosition[POS_OF_ANGLE]),2)
+  elif theMovement[MOVEMENT_TYPE] == BACKWARD:
+    # x position is distance*cos(angle)
+    newPosition[POS_OF_X] = round(newPosition[POS_OF_X] - theMovement[MOVEMENT_VALUE]*degreesCos(newPosition[POS_OF_ANGLE]),2)
+    newPosition[POS_OF_Y] = round(newPosition[POS_OF_Y] - theMovement[MOVEMENT_VALUE]*degreesSin(newPosition[POS_OF_ANGLE]),2)
   return tuple(newPosition)  

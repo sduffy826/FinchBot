@@ -18,6 +18,7 @@ class MyRobot:
   # it tries to make them in sync.
   def __init__(self, left, right, inAdjustmentMode=False):
     self.debugIt = True
+    self.debugItState = False
     self.leftWheel  = left
     self.rightWheel = right
     self.myBot = Finch()
@@ -26,7 +27,80 @@ class MyRobot:
     self.inWheelAdjustmentMode = inAdjustmentMode
     self.lasttime = time.time()
     self.update(self.inWheelAdjustmentMode)
+
+    # Keep track of the direction you should try on obstacles
+    self.obstacleDirectionToTry = finchConstants.LEFT
+    self.lastScrapedSide = " "
+    # Keep track of when the last time you moved forward, we use that
+    # to identify sensors
+    self.lastTimeIMovedForward = -1
+    self.obstacleState = { 
+      "left" : False,
+      "leftStateTime" : 0.0,
+      "leftElapsedTime" : 0.0,
+      "right" : False,
+      "rightStateTime" : 0.0,
+      "rightElapsedTime" : 0.0
+    }
  
+  # Reset the state of the sensors
+  def resetState(self):
+    self.obstacleState["left"] = False
+    self.obstacleState["leftStateTime"] = 0.0
+    self.obstacleState["leftElapsedTime"] = 0.0
+    self.obstacleState["right"] = False
+    self.obstacleState["rightStateTime"] = 0.0
+    self.obstacleState["rightElapsedTime"] = 0.0
+
+  # This is common routine to update the dictionary 'state' items associated
+  # with the sensors... we need this because we need the state to persist for
+  # a given amount of time before we think of it as 'real' (the bot sensors are flakey)
+  # NOTE: The state will only be updated when wheels are moving, or you pass in the 
+  # forceUpdate indicator
+  def updateMyState(self, forceUpdate=False):
+    if self.leftWheel != 0.0 or self.rightWheel != 0.0 or forceUpdate:
+      stateTime = time.time()
+      leftObst, rightObst  = self.myBot.obstacle()
+      
+      if self.obstacleState["left"] != leftObst or self.obstacleState["leftStateTime"] == 0.0:
+        self.obstacleState["left"] = leftObst
+        self.obstacleState["leftStateTime"] = stateTime
+        self.obstacleState["leftElapsedTime"] = 0.0
+      else:
+        self.obstacleState["leftElapsedTime"] = round(stateTime - self.obstacleState["leftStateTime"],4)
+
+      if self.obstacleState["right"] != rightObst or self.obstacleState["rightStateTime"] == 0.0:
+        self.obstacleState["right"] = rightObst
+        self.obstacleState["rightStateTime"] = stateTime
+        self.obstacleState["rightElapsedTime"] = 0.0
+      else:
+        self.obstacleState["rightElapsedTime"] = round(stateTime - self.obstacleState["rightStateTime"],4)
+  
+  # Helper to return indicator if an obstacle exists, we did this because we need the obstacle to
+  # persist for an amount of time (thresholdInSecs) before we say it's on
+  def hasObstacle(self,whichOne,thresholdInSecs=0.2):
+    if self.debugItState == True:
+      print("obstacleState:{0}".format(str(self.obstacleState)))
+
+    leftObst = False
+    if self.obstacleState["leftElapsedTime"] > thresholdInSecs:
+      leftObst = self.obstacleState["left"]
+    rightObst = False
+    if self.obstacleState["rightElapsedTime"] > thresholdInSecs:
+      rightObst = self.obstacleState["right"]
+
+    if self.debugItState == True:
+      print("in hasObstacle, leftObst:{0} rightObst{1}".format(leftObst,rightObst))
+
+    if whichOne == finchConstants.LEFT:
+      return leftObst
+    elif whichOne == finchConstants.RIGHT:
+      return rightObst
+    elif leftObst == True or rightObst == True:
+      return True
+    else:
+      return False
+
   def wheelHelper(self, whichWheel, logModeOnly=False):
     # For logging we don't want to show the polarity adjustment... could be
     # confusing to people analyzing wheel motion :)
@@ -55,6 +129,8 @@ class MyRobot:
       print("left: {0:.2f} right: {1:.2f}".format(self.wheelHelper("L"), self.wheelHelper("R") ))
 
     if (self.leftWheel != 0.0 or self.rightWheel != 0.0):
+      # Setting wheel speed, reset the sensors
+      self.resetState()
       self.myBot.wheels(self.wheelHelper("L"), self.wheelHelper("R"))
     else:
       self.myBot.wheels(0.0,0.0)
@@ -140,13 +216,9 @@ class MyRobot:
   # Return True if robot can move, false if there is some type of
   # obstacle
   def canMove(self):
-    # Put logic in here to see if you can move (i.e. no obstacles)
-    leftObst, rtObst = self.myBot.obstacle()
-    if leftObst or rtObst:
-      return False
-    else:
-      return True
-
+    # Add logic for other sensors
+    self.updateMyState()
+    return (self.hasObstacle("BOTH") == False)
 
   # Routine when robot feels a scrap (obstacle on one side of it), pass in the side
   def getOutOfScrape(self, sideOfScrape):
@@ -170,6 +242,33 @@ class MyRobot:
     else:
       return botUtils.calculateScrapeMovement(45, distanceToBackup)
       
+  # Return the direction to try when you hit an obstacle, put logic in here
+  def getObstacleDirectionToTry(self):
+    return self.obstacleDirectionToTry
+
+  def flipObstacleDirectionToTry(self):
+    if self.obstacleDirectionToTry == finchConstants.LEFT:
+      self.obstacleDirectionToTry = finchConstants.RIGHT 
+    else:
+      self.obstacleDirectionToTry = finchConstants.LEFT
+
+  # Return the side that was last scraped, put more in here
+  def getLastScrapeSide(self):
+    return self.lastScrapedSide
+
+  def isObstacle(self):
+    # Return True if you hit an obstacle (both sensors are true), if you
+    # only have one sensor then count that as a scrape and return false
+    leftObst, rightObst  = self.myBot.obstacle()
+    if leftObst == True and rightObst == True:
+      return True
+    elif leftObst == True or rightObst == True:
+      if leftObst == True:
+        self.lastScrapedSide = finchConstants.LEFT
+      else:
+        self.lastScrapedSide = finchConstants.RIGHT
+      return False
+
 
   # Return status of all robot attributes
   def status(self):
