@@ -9,7 +9,7 @@ import pythonUtils
 
 from collections import deque
 
-DEBUGIT = True
+DEBUGIT = False
 DEBUGIT2 = False
 
 smallTest = True
@@ -22,9 +22,11 @@ targetPosition = deque()
 if smallTest == False:
   targetPosition.append((72.0, 6.0, 0.0, finchConstants.TOPSPEED))
   targetPosition.append((68.0, 6.0, 0.0, finchConstants.SLOWSPEED)) 
+  robotRegion = (0.0, -6.0, 18, 96)
 else:
-  targetPosition.append((50.0, 18.0, 0.0, finchConstants.TOPSPEED))
-  targetPosition.append((46.0, 18.0, 0.0, finchConstants.SLOWSPEED))
+  targetPosition.append((42.0, 18.0, 0.0, finchConstants.TOPSPEED))
+  targetPosition.append((38.0, 18.0, 0.0, finchConstants.SLOWSPEED))
+  robotRegion = (0.0,-6.0,50,24)
 
 # This just tracks where we have been, we start at the origin
 robotPositions = []
@@ -38,6 +40,7 @@ for i in range(10):
 # Enter while loop to process all the records that have the location
 # we should be moving to.
 while len(targetPosition) > 0:
+  myRobot.setLedColor(finchConstants.GREEN)
   if DEBUGIT:
     print("=============================================================================================================")
     dumbKey = pythonUtils.input_char("Debug mode, hit any key 'q' to quit")
@@ -48,7 +51,7 @@ while len(targetPosition) > 0:
   # calculate how much distance will be covered with that speed (per sec)
   nextTarget        = targetPosition.pop()
   wheelSpeed2Use    = nextTarget[3] 
-  distancePerSecond = finchConstants.getSpeedPerSecond(wheelSpeed2Use)
+  distancePerSecond = finchConstants.getDistancePerSecond(wheelSpeed2Use)
  
   # Current position is the last one in the robotPositions array
   positionOfCurrentPosition = len(robotPositions)-1
@@ -87,21 +90,21 @@ while len(targetPosition) > 0:
       print("Movement:{0} is:{1}".format(movementPosition,str(theMovement)))
 
     # Process turn movement or forward movement, only two kinds :) 
-    if theMovement[0] == botUtils.TURN:
-      if theMovement[1] < 0.0:
-        myRobot.rightTurn(-theMovement[1])
+    if theMovement[botUtils.MOVEMENT_TYPE] == botUtils.TURN:
+      if theMovement[botUtils.MOVEMENT_VALUE] < 0.0:
+        myRobot.rightTurn(-theMovement[botUtils.MOVEMENT_VALUE])
       else:
-        myRobot.leftTurn(theMovement[1])
+        myRobot.leftTurn(theMovement[botUtils.MOVEMENT_VALUE])
       currPos = botUtils.whatsNewPositionAfterMovement(currPos, theMovement)
       robotPositions.append(currPos)
-    elif theMovement[0] == botUtils.FORWARD or theMovement[0] == botUtils.BACKWARD:
-      if theMovement[0] == botUtils.BACKWARD:
+    elif theMovement[botUtils.MOVEMENT_TYPE] == botUtils.FORWARD or theMovement[botUtils.MOVEMENT_TYPE] == botUtils.BACKWARD:
+      if theMovement[botUtils.MOVEMENT_TYPE] == botUtils.BACKWARD:
         wheelDirection = -1.0
       else:
         wheelDirection = 1.0
 
       # Reset the timer, we need to keep track of how long we're traveling
-      time2Target = (theMovement[1]/distancePerSecond)
+      time2Target = (theMovement[botUtils.MOVEMENT_VALUE]/distancePerSecond)
 
       if DEBUGIT:
         print("  wheelDirection:{0} time2Target{1:.2f} wheelSpeed2Use:{2:.2f}".format(wheelDirection,time2Target,wheelSpeed2Use))
@@ -122,7 +125,7 @@ while len(targetPosition) > 0:
 
       # Calculate the new position we are at, we create a movement tuple
       # so that we can call routine to calculate current position 
-      actualMovement = (theMovement[0],(timeMoving * distancePerSecond))
+      actualMovement = (theMovement[botUtils.MOVEMENT_TYPE],(timeMoving * distancePerSecond))
       currPos        = botUtils.whatsNewPositionAfterMovement(currPos,actualMovement)
       robotPositions.append(currPos)
 
@@ -138,15 +141,19 @@ while len(targetPosition) > 0:
           # First we clear out all the remaining movements, we replace them with our correcing ones
           movementPosition = 0
           pathToUse.clear()
-          if myRobot.isObstacle():
+          if myRobot.isObstacle(currPos,robotRegion):
+            # Have an obstacle, first call routine to check direction to move then call routine to 
+            # get out of it's path
+            myRobot.setLedColor(finchConstants.RED)
+            myRobot.checkAndSetObstacleDirectionToTry(currPos, robotRegion)
             pathToUse = myRobot.getOutOfObstacle(myRobot.getObstacleDirectionToTry())
           else:
+            myRobot.setLedColor(finchConstants.BLUE)
             pathToUse = myRobot.getOutOfScrape(myRobot.getLastScrapeSide())
           if DEBUGIT:
             print("In Obstacle avoidance, the path selected will be")
             for aMovement in pathToUse:
               print(str(aMovement))
-
   
   if successfulMovements == False:
     # We weren't successful, put the target back onto the stack

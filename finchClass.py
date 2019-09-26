@@ -257,20 +257,118 @@ class MyRobot:
   def getLastScrapeSide(self):
     return self.lastScrapedSide
 
-  def isObstacle(self):
+  def isObstacle(self, robotPosition, robotRegionOfTravel):
     # Return True if you hit an obstacle (both sensors are true), if you
     # only have one sensor then count that as a scrape and return false
-    leftObst, rightObst  = self.myBot.obstacle()
+    # leftObst, rightObst  = self.myBot.obstacle()
+    leftObst  = self.hasObstacle(finchConstants.LEFT)
+    rightObst = self.hasObstacle(finchConstants.RIGHT)
     if leftObst == True and rightObst == True:
       return True
     elif leftObst == True or rightObst == True:
-      if leftObst == True:
-        self.lastScrapedSide = finchConstants.LEFT
+      # The robot sensor don't always report true even
+      # when there's an obstacle right in front of it.  
+      # If the robot is close to the edge of it's region
+      # of travel then report this as a scrape otherwise
+      # report it as an obstacle
+      if self.isRobotCloseToEdge(robotPosition, robotRegionOfTravel) == True:
+        if leftObst == True:
+          self.lastScrapedSide = finchConstants.LEFT
+        else:
+          self.lastScrapedSide = finchConstants.RIGHT
+        return False
       else:
-        self.lastScrapedSide = finchConstants.RIGHT
+        return True
+    return False
+
+  # Determines if robot is oriented along the x or y axis (within 10 degree of it)
+  def robotOrientedAlongAxis(self,robotPosition):
+    orientedTowardAxis = " "
+    if ( robotPosition[botUtils.POS_OF_ANGLE] < 10 | robotPosition[botUtils.POS_OF_ANGLE] > 350 ):
+      orientedTowardAxis = "X+"
+    elif ( robotPosition[botUtils.POS_OF_ANGLE] > 170 and robotPosition[botUtils.POS_OF_ANGLE] < 190 ):
+      orientedTowardAxis = "X-"
+    elif ( robotPosition[botUtils.POS_OF_ANGLE] > 80 and robotPosition[botUtils.POS_OF_ANGLE] < 100 ):
+      orientedTowardAxis = "Y+"
+    elif ( robotPosition[botUtils.POS_OF_ANGLE] > 260 and robotPosition[botUtils.POS_OF_ANGLE] < 280 ):
+      orientedTowardAxis = "Y-"
+    return orientedTowardAxis
+
+  # Determine if robot is close to a particular regions edge
+  def getRobotClosestEdges(self, robotPosition, regionOfTravel, threshold=finchConstants.HALFMYWIDTH):
+    # Calculate the distance from coordinates
+    closeEdges = []
+    distanceToLeftX = robotPosition[botUtils.POS_OF_X] - regionOfTravel[0]
+    distanceToRightX = regionOfTravel[2] - robotPosition[botUtils.POS_OF_X] 
+    distanceFromBottomY = robotPosition[botUtils.POS_OF_Y] - regionOfTravel[1]
+    distanceFromTopY = regionOfTravel[3] - robotPosition[botUtils.POS_OF_Y]
+    if (distanceToLeftX <= threshold):
+      closeEdges.append("LX")
+    elif (distanceToRightX <= threshold):
+      closeEdges.append("UX")
+
+    if (distanceFromBottomY <= threshold):
+      closeEdges.append("LY")
+    elif (distanceFromTopY <= threshold):
+      closeEdges.append("UY")
+    return closeEdges
+
+  def getFinchReference(self):
+    return self.myBot
+ 
+  # Revisit this, there's definitely better way to do this... look in to matrix trasnformations
+  def checkAndSetObstacleDirectionToTry(self, robotPosition, regionOfTravel, threshold=finchConstants.HALFMYWIDTH):
+    # Get closest edges
+    myCloseEdges = self.getRobotClosestEdges(robotPosition, regionOfTravel, threshold)
+    newDirection = " "
+    if len(myCloseEdges) > 0:
+      # We are close to an edge, get the robot orientation to figure out the edges that
+      # are used to set new direction... when in x direction we look at y values, when
+      # pointing in y direction we look at x values
+      robotOrientation = self.robotOrientedAlongAxis(robotPosition)
+      if robotOrientation == "X+":
+        if "UY" in myCloseEdges:
+          newDirection = finchConstants.RIGHT
+        elif "LY" in myCloseEdges:
+          newDirection = finchConstants.LEFT
+      elif robotOrientation == "X-":
+        if "UY" in myCloseEdges:
+          newDirection = finchConstants.LEFT
+        elif "LY" in myCloseEdges:
+          newDirection = finchConstants.RIGHT
+      elif robotOrientation == "Y+":
+        if "UX" in myCloseEdges:
+          newDirection = finchConstants.LEFT
+        elif "LX" in myCloseEdges:
+          newDirection = finchConstants.RIGHT
+      elif robotOrientation == "Y-":
+        if "UX" in myCloseEdges:
+          newDirection = finchConstants.RIGHT
+        elif "LX" in myCloseEdges:
+          newDirection = finchConstants.LEFT
+
+      if newDirection != self.obstacleDirectionToTry:
+        self.flipObstacleDirectionToTry()
+      
+
+  # Helper just returns true or false stating that we're close to edge.
+  def isRobotCloseToEdge(self, robotPosition, regionOfTravel, threshold=finchConstants.HALFMYWIDTH):
+    edgesCloseTo = self.getRobotClosestEdges(robotPosition, regionOfTravel, threshold)
+    if len(edgesCloseTo) > 0:
+      return True
+    else:
       return False
 
+  # Set the finches nose color :)
+  def setLedColor(self, theColor):
+    if theColor == finchConstants.RED:
+      self.myBot.led(255,0,0)
+    elif theColor == finchConstants.GREEN:
+      self.myBot.led(0,255,0)
+    elif theColor == finchConstants.BLUE:
+      self.myBot.led(0,0,255)
 
+    
   # Return status of all robot attributes
   def status(self):
     # This returns elapsed time since clock was set and a tuple with the attributes, the wheels, obstacle and lights

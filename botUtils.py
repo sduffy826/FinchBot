@@ -1,4 +1,5 @@
 import math
+import logging
 
 FORWARD = "F"
 TURN = "T"
@@ -18,6 +19,8 @@ POS_OF_ANGLE=2
 # For movements
 MOVEMENT_TYPE=0
 MOVEMENT_VALUE=1
+
+logging.basicConfig(filename='finchRobot.log', level=logging.DEBUG)
 
 # ----------------------------------------------------------------------
 # Calculate the angle required to get from the current position to the
@@ -210,6 +213,8 @@ def calculateScrapeMovement(scrapeAngle, distanceToBackup):
   # Calculate the degreee of angle to point toward Y axis
   # and the distance you need to travel (note the distance is the
   # value from startY so it can be negative)
+  logging.debug("boUtils-calculateScrapeMovement scrapeAngle: {0} distanceToBackup: {1}".format(scrapeAngle,distanceToBackup))
+
   scrape_moves = []
   scrape_moves.append((TURN,scrapeAngle))
   scrape_moves.append((BACKWARD,distanceToBackup))
@@ -220,7 +225,7 @@ def calculateScrapeMovement(scrapeAngle, distanceToBackup):
   # Found it's better to not move back to the starting postion for now...
   # We're oriented in correct direction so staying back allows time
   # for sensors to get re-oriented
-  directionBack = round(distanceToBackup * degreesCos(abs(scrapeAngle)),2)
+  #directionBack = round(distanceToBackup * degreesCos(abs(scrapeAngle)),2)
   #scrape_moves.append((FORWARD, directionBack))
   return scrape_moves
 
