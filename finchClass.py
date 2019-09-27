@@ -2,9 +2,12 @@ from finch import Finch
 import time 
 import finchConstants
 import botUtils
+import pythonUtils
 import logging
 
-logging.basicConfig(filename='finchRobot.log', level=logging.DEBUG)
+# get logger for finchClass, if you want a new one then have the parent program initialize
+# the logger with the last parm of True
+finchClassLogger = pythonUtils.getCustomLogger("finchClass",logging.INFO,logging.DEBUG, False)
 
 STAT_ELAPSED = 0
 STAT_WHEELS = 1
@@ -12,6 +15,9 @@ STAT_TEMP = 2
 STAT_LIGHTS = 3
 STAT_OBSTACLE = 4
 STAT_ACCEL = 5
+
+# Specify the constants for how long an obstacle must persist before it's reported as On
+OBSTACLE_PERSIST_TIME_REQUIRED = 0.1
 
 # Set amount for thresholdtoside; if we're within that and hit an
 # obstacle then it's a scrap
@@ -34,6 +40,11 @@ class MyRobot:
     # Keep track of when the last time you moved forward, we use that
     # to identify sensors
     self.lastTimeIMovedForward = -1
+
+    # Use vars below for logging when 
+    self.lastPersistedLeftObstacleState = False
+    self.lastPersistedLeftObstacleState = False
+
     self.obstacleState = { 
       "left" : False,
       "leftStateTime" : 0.0,
@@ -68,14 +79,19 @@ class MyRobot:
       stateTime = time.time()
       leftObst, rightObst  = self.myBot.obstacle()
       
+      # State changed or time hasn't been set
       if self.obstacleState["left"] != leftObst or self.obstacleState["leftStateTime"] == 0.0:
+        finchClassLogger.info("finchClass-updateMyState, STATE Changed, Left was:{0} is:{1}".format(str(self.obstacleState["left"]),str(leftObst)))
         self.obstacleState["left"] = leftObst
         self.obstacleState["leftStateTime"] = stateTime
-        self.obstacleState["leftElapsedTime"] = 0.0
+        self.obstacleState["leftElapsedTime"] = 0.0        
       else:
+        # Calculate the elapsed time in this state
         self.obstacleState["leftElapsedTime"] = round(stateTime - self.obstacleState["leftStateTime"],4)
 
+      # Same as above but check the right obstacle sensor
       if self.obstacleState["right"] != rightObst or self.obstacleState["rightStateTime"] == 0.0:
+        finchClassLogger.info("finchClass-updateMyState, STATE Changed, Right was:{0} is:{1}".format(str(self.obstacleState["right"]),str(rightObst)))
         self.obstacleState["right"] = rightObst
         self.obstacleState["rightStateTime"] = stateTime
         self.obstacleState["rightElapsedTime"] = 0.0
@@ -84,17 +100,26 @@ class MyRobot:
   
   # Helper to return indicator if an obstacle exists, we did this because we need the obstacle to
   # persist for an amount of time (thresholdInSecs) before we say it's on
-  def hasObstacle(self,whichOne,thresholdInSecs=0.2):
-    logging.debug("finchClass-hasObstacle, obstacleState:{0}".format(str(self.obstacleState)))
-
+  # Caller can specify which sensor to check (LEFT/RIGHT, if they don't then it'll return True if
+  # either sensor reports an obstacle)
+  def hasObstacle(self,whichOne,thresholdInSecs=OBSTACLE_PERSIST_TIME_REQUIRED):
+    # Commented out logger... too many messages here, changed 'updateMyState' to report when state changes
+    # finchClassLogger.debug("finchClass-hasObstacle, obstacleState:{0}".format(str(self.obstacleState)))
     leftObst = False
     if self.obstacleState["leftElapsedTime"] > thresholdInSecs:
       leftObst = self.obstacleState["left"]
+      if leftObst != self.lastPersistedLeftObstacleState:    
+        finchClassLogger.info("finchClass-hasObstacle, PERSISTED Left Obstacle State Change old/new: {0}/{1}".format(self.lastPersistedLeftObstacleState,leftObst))
+        self.lastPersistedLeftObstacleState = leftObst
+    
     rightObst = False
     if self.obstacleState["rightElapsedTime"] > thresholdInSecs:
       rightObst = self.obstacleState["right"]
+      if leftObst != self.lastPersistedLeftObstacleState:    
+        finchClassLogger.info("finchClass-hasObstacle, PERSISTED Right Obstacle State Change old/new: {0}/{1}".format(self.lastPersistedRightObstacleState,rightObst))
+        self.lastPersistedRightObstacleState = rightObst
 
-    logging.debug("finchClass-hasObstacle, leftObst:{0} rightObst{1}".format(leftObst,rightObst))
+    # finchClassLogger.debug("finchClass-hasObstacle, leftObst:{0} rightObst{1}".format(leftObst,rightObst))
 
     if whichOne == finchConstants.LEFT:
       return leftObst
@@ -129,7 +154,7 @@ class MyRobot:
   # Set the wheel speed (to move, unless both are zero)
   def update(self, useAdjustment):
     self.inWheelAdjustmentMode = useAdjustment
-    logging.debug("finchClass-update, left: {0:.2f} right: {1:.2f}".format(self.wheelHelper("L"), self.wheelHelper("R")))
+    finchClassLogger.debug("finchClass-update, left: {0:.2f} right: {1:.2f}".format(self.wheelHelper("L"), self.wheelHelper("R")))
 
     if (self.leftWheel != 0.0 or self.rightWheel != 0.0):
       # Setting wheel speed, reset the sensors
@@ -310,9 +335,9 @@ class MyRobot:
     distanceFromTopY = regionOfTravel[3] - robotPosition[botUtils.POS_OF_Y]
     
     tempString = "finchClass.py, getRobotClosesEdges, robotPosition: {0} regionOfTravel: {1} threshold: {2}"
-    logging.debug(tempString.format(str(robotPosition),str(regionOfTravel),threshold))
+    finchClassLogger.debug(tempString.format(str(robotPosition),str(regionOfTravel),threshold))
     tempString = "   leftXDist: {0} rightXDist: {1}, lowerXDist: {2} upperXDist: {3}"
-    logging.debug(tempString.format(distanceToLeftX,distanceToRightX, distanceFromBottomY, distanceFromTopY))
+    finchClassLogger.debug(tempString.format(distanceToLeftX,distanceToRightX, distanceFromBottomY, distanceFromTopY))
     
     if (distanceToLeftX <= threshold):
       closeEdges.append("LX")
@@ -331,13 +356,13 @@ class MyRobot:
   # Revisit this, there's definitely better way to do this... look in to matrix trasnformations
   def checkAndSetObstacleDirectionToTry(self, robotPosition, regionOfTravel, threshold=THRESHOLDTOSIDE):
     # Get closest edges
-    logging.debug("finchClass.py, checkAndSetObstacleDirectionToTry, start")
+    finchClassLogger.debug("finchClass.py, checkAndSetObstacleDirectionToTry, start")
     myCloseEdges = self.getRobotClosestEdges(robotPosition, regionOfTravel, threshold)
     newDirection = " "
     if len(myCloseEdges) > 0:
-      logging.debug("finchClass.py, checkAndSetObstacleDirectionToTry, values below")
+      finchClassLogger.debug("finchClass.py, checkAndSetObstacleDirectionToTry, values below")
       for anEdge in myCloseEdges:
-        logging.debug("  {0}".format(str(anEdge)))
+        finchClassLogger.debug("  {0}".format(str(anEdge)))
    
       # We are close to an edge, get the robot orientation to figure out the edges that
       # are used to set new direction... when in x direction we look at y values, when
@@ -364,10 +389,10 @@ class MyRobot:
         elif "LX" in myCloseEdges:
           newDirection = finchConstants.LEFT
 
-      logging.debug("finchClass.py, checkAndSetObstacleDirectionToTry, oldDirection: {0} newDirection: {1}".format(self.obstacleDirectionToTry,newDirection))
+      finchClassLogger.debug("finchClass.py, checkAndSetObstacleDirectionToTry, oldDirection: {0} newDirection: {1}".format(self.obstacleDirectionToTry,newDirection))
       if newDirection != self.obstacleDirectionToTry:
         self.flipObstacleDirectionToTry()
-    logging.debug("finchClass.py, checkAndSetObstacleDirectionToTry, start")
+    finchClassLogger.debug("finchClass.py, checkAndSetObstacleDirectionToTry, start")
 
   # Helper just returns true or false stating that we're close to edge.
   def isRobotCloseToEdge(self, robotPosition, regionOfTravel, threshold=THRESHOLDTOSIDE):

@@ -63,5 +63,6 @@ BLUE="B"
 # act differently :)  See the analysis spreadsheet to see how
 # I came up with the 2.819 value and 11.91 (base at speed .4)
 def getDistancePerSecond(wheelSpeed):
-  # Changed to 11.53 to make little faster
-  return round(((((wheelSpeed-0.4)*2.819)+11.53)*wheelSpeed),2)
+  # Commented value below was with first robot
+  # return round(((((wheelSpeed-0.4)*2.819)+11.91)*wheelSpeed),2)
+  return round(((((wheelSpeed-0.4)*3.64)+11.47)*wheelSpeed),2)

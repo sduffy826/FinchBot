@@ -1,4 +1,5 @@
 import math
+import pythonUtils
 import logging
 
 FORWARD = "F"
@@ -20,7 +21,9 @@ POS_OF_ANGLE=2
 MOVEMENT_TYPE=0
 MOVEMENT_VALUE=1
 
-logging.basicConfig(filename='finchRobot.log', level=logging.DEBUG)
+# get logger for botUtils, if you want a new one then have the parent program initialize
+# the logger with the last parm of True
+botUtilsLogger = pythonUtils.getCustomLogger("botUtils",logging.INFO,logging.DEBUG, False)
 
 # ----------------------------------------------------------------------
 # Calculate the angle required to get from the current position to the
@@ -29,7 +32,7 @@ def calculateAngleToTarget(currentPosition, endX, endY):
   xDelta = endX - currentPosition[POS_OF_X]
   yDelta = endY - currentPosition[POS_OF_Y]
 
-  logging.debug("boUtils-calculateAngleToTarget, xDelta: {0:.2f} yDelta: {1:.2f}".format(xDelta,yDelta))
+  botUtilsLogger.debug("boUtils-calculateAngleToTarget, xDelta: {0:.2f} yDelta: {1:.2f}".format(xDelta,yDelta))
 
   arcTanVar = 0.0
   if (xDelta == 0.0):
@@ -39,7 +42,7 @@ def calculateAngleToTarget(currentPosition, endX, endY):
       arcTanVar = (yDelta*1.0)/(xDelta*1.0)
     
     angle2GetThere = round(math.degrees(math.atan(abs(arcTanVar))),0)
-    logging.debug("boUtils-calculateAngleToTarget, arcTan: {2:.4f}".format(arcTanVar))
+    botUtilsLogger.debug("boUtils-calculateAngleToTarget, arcTan: {2:.4f}".format(arcTanVar))
 
   if xDelta < 0:
     if yDelta < 0:
@@ -52,7 +55,7 @@ def calculateAngleToTarget(currentPosition, endX, endY):
     if yDelta < 0:
       angle2GetThere = 360 - angle2GetThere 
 
-  logging.debug("boUtils-calculateAngleToTarget,, angle: {0:.2f}".format(angle2GetThere))
+  botUtilsLogger.debug("boUtils-calculateAngleToTarget,, angle: {0:.2f}".format(angle2GetThere))
   
   return angle2GetThere
 
@@ -90,7 +93,7 @@ def calculateDistanceBetweenPoints(startPosition,endPosition):
 # It will return a list of tuples that defines how to get there, the tuple
 # returned has xDistance, yDistance, deltaAngle
 def calculateMovementToTarget(currentPosition, targetPosition, path2Use):
-  logging.debug("boUtils-calculateMovementToTarget, curr:{0} targ:{1} path:{2}".format(str(currentPosition),
+  botUtilsLogger.debug("boUtils-calculateMovementToTarget, curr:{0} targ:{1} path:{2}".format(str(currentPosition),
                                                                                        str(targetPosition),path2Use))
   if path2Use == X_PATH:
     return calculateMovementToTargetUsingXAxis(currentPosition, targetPosition)
@@ -99,7 +102,7 @@ def calculateMovementToTarget(currentPosition, targetPosition, path2Use):
   elif path2Use == DIRECT_PATH:
     return calculateMovementToTargetUsingDirectLine(currentPosition, targetPosition)
   else:
-    logging.error("Invalid path of {0}".format(path2Use))
+    botUtilsLogger.error("Invalid path of {0}".format(path2Use))
   return []
 
 
@@ -127,20 +130,20 @@ def calculateMovementToTargetUsingXAxis(currentPos, targetPos):
   # current x position, current angle and the desired x position
   xMovements = calculatePerpendicularMovementToX(currentPos[POS_OF_X], currentPos[POS_OF_ANGLE], targetPos[POS_OF_X])
 
-  logging.debug("boUtils-calculateMovementToTargetUsingXAxis, (X Movment) values below")
+  botUtilsLogger.debug("boUtils-calculateMovementToTargetUsingXAxis, (X Movment) values below")
   for aMove in xMovements:
-    logging.debug("  {0}".format(str(aMove)))
+    botUtilsLogger.debug("  {0}".format(str(aMove)))
 
   # We have the movements necessary to get there... determine what your new position
   # would be after it.. need that for determining next set of movements.
   tempPos = whatsNewPositionAfterMovements(currentPos, xMovements)
 
-  logging.debug("boUtils-calculateMovementToTargetUsingXAxis, newPos after that {0}".format(str(tempPos)))
+  botUtilsLogger.debug("boUtils-calculateMovementToTargetUsingXAxis, newPos after that {0}".format(str(tempPos)))
 
   yMovements = calculatePerpendicularMovementToY(tempPos[POS_OF_Y],tempPos[POS_OF_ANGLE],targetPos[POS_OF_Y])
-  logging.debug("boUtils-calculateMovementToTargetUsingXAxis, (Y Movement) values below")
+  botUtilsLogger.debug("boUtils-calculateMovementToTargetUsingXAxis, (Y Movement) values below")
   for aMove in yMovements:
-    logging.debug("  {0}".format(str(aMove)))
+    botUtilsLogger.debug("  {0}".format(str(aMove)))
 
 
   # Return the two lists concatenated together.
@@ -212,7 +215,7 @@ def calculateScrapeMovement(scrapeAngle, distanceToBackup):
   # Calculate the degreee of angle to point toward Y axis
   # and the distance you need to travel (note the distance is the
   # value from startY so it can be negative)
-  logging.debug("boUtils-calculateScrapeMovement scrapeAngle: {0} distanceToBackup: {1}".format(scrapeAngle,distanceToBackup))
+  botUtilsLogger.debug("boUtils-calculateScrapeMovement scrapeAngle: {0} distanceToBackup: {1}".format(scrapeAngle,distanceToBackup))
 
   scrape_moves = []
   scrape_moves.append((TURN,scrapeAngle))
@@ -234,10 +237,10 @@ def calculateScrapeMovement(scrapeAngle, distanceToBackup):
 # given speed
 def calculateTimeToDistance(distance, speed):
   if speed > 0.001:
-    logging.debug("boUtils-calculateTimeToDistance, distance: {0} speed: {1} time: {2}".format(distance,speed,round(distance/speed,2)))
+    botUtilsLogger.debug("boUtils-calculateTimeToDistance, distance: {0} speed: {1} time: {2}".format(distance,speed,round(distance/speed,2)))
     return round(distance/speed,2)
   else:
-    logging.debug("boUtils-calculateTimeToDistance, distance: {0} speed: {1} time: {2}".format(distance,speed,"Infinity"))
+    botUtilsLogger.debug("boUtils-calculateTimeToDistance, distance: {0} speed: {1} time: {2}".format(distance,speed,"Infinity"))
     return float("inf")
 
 
