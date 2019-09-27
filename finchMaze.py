@@ -173,8 +173,6 @@ while len(targetPosition) > 0:
           # Put out the path from the obstacle or scrape
           for aMovement in pathToUse:
             mazeLogger.debug("finchMaze.py,  {0}".format(str(aMovement)))
-      else:
-        obstacleCount = 0
          
   if successfulMovements == False:
     # We weren't successful, put the target back onto the stack

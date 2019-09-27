@@ -332,7 +332,8 @@ class MyRobot:
   def getOutOfObstacle(self, directionToMove):
     # We want to try a position to the left or right that is 1/2 our width away
     # Calculate the distance we need to backup first, it's 1/2 width divided by sin(45)
-    distanceToBackup = (finchConstants.TOTALWIDTH) / botUtils.degreesSin(45)
+    distanceToBackup = round((finchConstants.TOTALWIDTH) / botUtils.degreesSin(45),2)
+    finchClassLogger.info("finchClass-getOutOfObstacle, directionToMove: {0} distanceToBackup: {1}".format(directionToMove,str(distanceToBackup)))
     if directionToMove == finchConstants.LEFT:
       # Want angle of -45 to turn right then backup
       return botUtils.calculateScrapeMovement(-45.0, distanceToBackup)
@@ -350,9 +351,15 @@ class MyRobot:
       self.obstacleDirectionToTry = finchConstants.LEFT
     finchClassLogger.info("finchClass-flipObstacleDirectionToTry, new direction: {0}".format(self.obstacleDirectionToTry))
 
-  # Return the side that was last scraped, put more in here
+  # Return the side that was last scraped, since we calculate the direction to move before
+  # this, it's opposite out current direction... down the road see if you can derive it on 
+  # accelarator
   def getLastScrapeSide(self):
-    return self.lastScrapedSide
+    if self.obstacleDirectionToTry == finchConstants.LEFT:
+      return finchConstants.RIGHT
+    else:
+      return finchConstants.LEFT
+    #return self.lastScrapedSide
 
   def isObstacle(self, robotPosition, robotRegionOfTravel):
     # Return True if you hit an obstacle (both sensors are true), if you
