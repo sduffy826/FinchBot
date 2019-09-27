@@ -1,0 +1,7 @@
+
+#!/bin/bash
+rm ./finchRobot.log
+rm ./botUtils_2019*
+rm ./finchClass_2019*
+rm ./finch_2019*
+rm ./finchTest_2019*

@@ -19,6 +19,8 @@ STAT_ACCEL = 5
 # Specify the constants for how long an obstacle must persist before it's reported as On
 OBSTACLE_PERSIST_TIME_REQUIRED = 0.1
 
+OBSTACLE_READING_DELAY = 0.01
+
 # Set amount for thresholdtoside; if we're within that and hit an
 # obstacle then it's a scrap
 THRESHOLDTOSIDE = finchConstants.HALFMYWIDTH + 1
@@ -43,7 +45,15 @@ class MyRobot:
 
     # Use vars below for logging when 
     self.lastPersistedLeftObstacleState = False
-    self.lastPersistedLeftObstacleState = False
+    self.lastPersistedRightObstacleState = False
+
+    # Obstacle reading goes haywire... we'll count up readings within
+    # an interval and use the overall score to report
+    self.lastObstacleReading = 0.0
+    self.lastObstacleReadingLeftScores  = [0,0,0,0,0]
+    self.lastObstacleReadingRightScores = [0,0,0,0,0]
+    self.scorePosition = 0
+    self.obstacleNumberOfScores = len(self.lastObstacleReadingLeftScores)
 
     self.obstacleState = { 
       "left" : False,
@@ -69,6 +79,13 @@ class MyRobot:
     self.obstacleState["rightStateTime"] = 0.0
     self.obstacleState["rightElapsedTime"] = 0.0
 
+    self.lastPersistedLeftObstacleState = False
+    self.lastPersistedRightObstacleState = False
+    self.lastObstacleReading = 0.0
+    self.lastObstacleReadingLeftScores  = [0,0,0,0,0]
+    self.lastObstacleReadingRightScores = [0,0,0,0,0]
+    self.scorePosition = 0
+
   # This is common routine to update the dictionary 'state' items associated
   # with the sensors... we need this because we need the state to persist for
   # a given amount of time before we think of it as 'real' (the bot sensors are flakey)
@@ -77,12 +94,57 @@ class MyRobot:
   def updateMyState(self, forceUpdate=False):
     if self.leftWheel != 0.0 or self.rightWheel != 0.0 or forceUpdate:
       stateTime = time.time()
+    
       leftObst, rightObst  = self.myBot.obstacle()
+
+      # Because obstacle readings are erradic I take last 5 readings, and report that
+      # value if sum of array is > 2 then report True else report false
+      if leftObst == True:
+        leftIntValue = 1
+      else:
+        leftIntValue = 0
+      if rightObst == True:
+        rightIntValue = 1
+      else:
+        rightIntValue = 0
+      indexPosition = self.scorePosition % 5
+      self.lastObstacleReadingLeftScores[indexPosition] = leftIntValue
+      self.lastObstacleReadingRightScores[indexPosition] = rightIntValue
+
+      self.scorePosition = indexPosition + 1
+
+      lastReadingElapsed = round(stateTime - self.lastObstacleReading,3)
+      finchClassLogger.debug("finchClass-updateMyState, lastReadingElapsed: {0}, leftObst: {1} rightObst{2}".format(lastReadingElapsed,leftObst,rightObst))
+      # If reading is less than intervals ignore it
+      if lastReadingElapsed < OBSTACLE_READING_DELAY:
+        return
+
+      self.lastObstacleReading = stateTime
+
+      # Calculate the value for each of the obstacle sensors
+      leftIntValue = 0
+      rightIntValue = 0
+      indexPosition = 0
+      while indexPosition < self.obstacleNumberOfScores:
+        leftIntValue += self.lastObstacleReadingLeftScores[indexPosition]
+        rightIntValue += self.lastObstacleReadingRightScores[indexPosition]
+        indexPosition += 1
+
+      if leftIntValue > 2:
+        leftObstacleReading = True
+      else:
+        leftObstacleReading = False
+
+      if rightIntValue > 2:
+        rightObstacleReading = True
+      else:
+        rightObstacleReading = False
+      finchClassLogger.debug("finchClass-updateMyState, leftObstacleReading: {0} rightObstacleReading: {1}".format(leftObstacleReading,rightObstacleReading))
       
       # State changed or time hasn't been set
-      if self.obstacleState["left"] != leftObst or self.obstacleState["leftStateTime"] == 0.0:
-        finchClassLogger.info("finchClass-updateMyState, STATE Changed, Left was:{0} is:{1}".format(str(self.obstacleState["left"]),str(leftObst)))
-        self.obstacleState["left"] = leftObst
+      if self.obstacleState["left"] != leftObstacleReading or self.obstacleState["leftStateTime"] == 0.0:
+        finchClassLogger.info("finchClass-updateMyState, STATE Changed, Left was:{0} is:{1}".format(str(self.obstacleState["left"]),str(leftObstacleReading)))
+        self.obstacleState["left"] = leftObstacleReading
         self.obstacleState["leftStateTime"] = stateTime
         self.obstacleState["leftElapsedTime"] = 0.0        
       else:
@@ -90,9 +152,9 @@ class MyRobot:
         self.obstacleState["leftElapsedTime"] = round(stateTime - self.obstacleState["leftStateTime"],4)
 
       # Same as above but check the right obstacle sensor
-      if self.obstacleState["right"] != rightObst or self.obstacleState["rightStateTime"] == 0.0:
-        finchClassLogger.info("finchClass-updateMyState, STATE Changed, Right was:{0} is:{1}".format(str(self.obstacleState["right"]),str(rightObst)))
-        self.obstacleState["right"] = rightObst
+      if self.obstacleState["right"] != rightObstacleReading or self.obstacleState["rightStateTime"] == 0.0:
+        finchClassLogger.info("finchClass-updateMyState, STATE Changed, Right was:{0} is:{1}".format(str(self.obstacleState["right"]),str(rightObstacleReading)))
+        self.obstacleState["right"] = rightObstacleReading
         self.obstacleState["rightStateTime"] = stateTime
         self.obstacleState["rightElapsedTime"] = 0.0
       else:
@@ -247,10 +309,13 @@ class MyRobot:
     # Add logic for other sensors
     # If we're going in reverse then don't check sensors
     if (self.leftWheel <= 0.0 and self.rightWheel <= 0.0) or ignoreObstacles:
+      # print("canMove, ignoring obstacles")
       return True
     else:
       self.updateMyState()
-      return (self.hasObstacle("BOTH") == False)
+      rtnValue = (self.hasObstacle("BOTH") == False)
+      # print("canMove returns {0}".format(rtnValue))
+      return rtnValue
 
   # Routine when robot feels a scrap (obstacle on one side of it), pass in the side
   def getOutOfScrape(self, sideOfScrape):
@@ -283,6 +348,7 @@ class MyRobot:
       self.obstacleDirectionToTry = finchConstants.RIGHT 
     else:
       self.obstacleDirectionToTry = finchConstants.LEFT
+    finchClassLogger.info("finchClass-flipObstacleDirectionToTry, new direction: {0}".format(self.obstacleDirectionToTry))
 
   # Return the side that was last scraped, put more in here
   def getLastScrapeSide(self):
@@ -336,7 +402,7 @@ class MyRobot:
     
     tempString = "finchClass.py, getRobotClosesEdges, robotPosition: {0} regionOfTravel: {1} threshold: {2}"
     finchClassLogger.debug(tempString.format(str(robotPosition),str(regionOfTravel),threshold))
-    tempString = "   leftXDist: {0} rightXDist: {1}, lowerXDist: {2} upperXDist: {3}"
+    tempString = "   leftXDist: {0} rightXDist: {1}, lowerYDist: {2} upperYDist: {3}"
     finchClassLogger.debug(tempString.format(distanceToLeftX,distanceToRightX, distanceFromBottomY, distanceFromTopY))
     
     if (distanceToLeftX <= threshold):
@@ -417,8 +483,6 @@ class MyRobot:
     # This returns elapsed time since clock was set and a tuple with the attributes, the wheels, obstacle and lights
     # are tuples (so it's a tuple of tuples (except for temp))
     leftObst, rightObst  = self.myBot.obstacle()
-
-    print("leftObst: {0} rightObst: {1}".format(leftObst,rightObst))
     currStat = (self.getElapsedTime(),
                 (self.wheelHelper("L",True), self.wheelHelper("R",True)),  
                 self.myBot.temperature(),
