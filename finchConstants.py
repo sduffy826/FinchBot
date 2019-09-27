@@ -14,10 +14,10 @@ RIGHTWHEELADJUSTMENT=0.0
 # determine angles requested.
 # Use the finchSensorTest.py program and test rotations if you want to verify time
 LEFTROTATIONSPEED=0.3
-LEFTROTATIONTIME=3.75
+LEFTROTATIONTIME=4.5
 
 RIGHTROTATIONSPEED=0.3
-RIGHTROTATIONTIME=3.9
+RIGHTROTATIONTIME=4.5
 
 # Constants for speed
 SLOWSPEED=0.4
@@ -28,7 +28,7 @@ TOPSPEED=1.0
 # When encounter scrape (rub against object) use the speed/angle/distance
 # to try and correct the issue
 SCRAPESPEED=0.3
-SCRAPEANGLE=20.0
+SCRAPEANGLE=10.0
 SCRAPEBACKUPDISTANCE=3.0
 
 # Var below used when incrementing speed of robot up/down
@@ -63,4 +63,5 @@ BLUE="B"
 # act differently :)  See the analysis spreadsheet to see how
 # I came up with the 2.819 value and 11.91 (base at speed .4)
 def getDistancePerSecond(wheelSpeed):
-  return round(((((wheelSpeed-0.4)*2.819)+11.91)*wheelSpeed),2)
+  # Changed to 11.53 to make little faster
+  return round(((((wheelSpeed-0.4)*2.819)+11.53)*wheelSpeed),2)

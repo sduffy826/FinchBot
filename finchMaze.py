@@ -11,7 +11,8 @@ import sys
 
 from collections import deque
 
-STEPTHRU = False
+LOGMOVEMENT = False
+STEPTHRU = True
 
 logging.basicConfig(stream=sys.stdout, filename='finchRobot.log', level=logging.DEBUG)
 
@@ -31,7 +32,7 @@ logging.basicConfig(stream=sys.stdout, filename='finchRobot.log', level=logging.
 # handler.setFormatter(formatter)
 # root.addHandler(handler)
 
-smallTest = True
+smallTest = False
 
 # This a stack, it has our current target location and the speed
 # we should use to get there... it's a stack so targets are processed
@@ -39,14 +40,21 @@ smallTest = True
 targetPosition = deque()
 
 if smallTest == False:
-  targetPosition.append((72.0, 6.0, 0.0, finchConstants.TOPSPEED))
-  targetPosition.append((68.0, 6.0, 0.0, finchConstants.SLOWSPEED)) 
-  robotRegion = (0.0, -6.0, 18, 96)
+  targetPosition.append((88.0, 2.0, 0.0, finchConstants.MEDIUMSPEED, True))
+  targetPosition.append((84.0, 10.0, 0.0, finchConstants.MEDIUMSPEED, True))
+  targetPosition.append((78.0, 6.0, 0.0, finchConstants.TOPSPEED, True))
+  targetPosition.append((69.0, 6.0, 0.0, finchConstants.MEDIUMSPEED, False))
+  #targetPosition.append((68.0, 6.0, 0.0, finchConstants.MEDIUMSPEED, False)) 
+  robotRegion = (0.0, -6.0, 96, 18)
 else:
-  targetPosition.append((42.0, 18.0, 0.0, finchConstants.TOPSPEED))
-  targetPosition.append((38.0, 18.0, 0.0, finchConstants.SLOWSPEED))
-  robotRegion = (0.0,-6.0,50,24)
-
+  targetPosition.append((36.0, 22.0, 0.0, finchConstants.TOPSPEED, True))
+  targetPosition.append((24.0, 22.0, 0.0, finchConstants.SLOWSPEED, False))
+  testLeftSide = False
+  if testLeftSide == True:
+    robotRegion = (0.0,24.0,40,27)
+  else:
+    robotRegion = (0.0,-5.5,40,27)
+  
 # This just tracks where we have been, we start at the origin
 robotPositions = []
 robotPositions.append((0.0,0.0,0.0))
@@ -57,6 +65,7 @@ logging.info("finchMaze.py, Program started")
 
 # Enter while loop to process all the records that have the location
 # we should be moving to.
+obstacleCount = 0
 while len(targetPosition) > 0:
   myRobot.setLedColor(finchConstants.GREEN)
 
@@ -70,6 +79,7 @@ while len(targetPosition) > 0:
   # calculate how much distance will be covered with that speed (per sec)
   nextTarget        = targetPosition.pop()
   wheelSpeed2Use    = nextTarget[3] 
+  ignoreObstacles   = nextTarget[4]
   distancePerSecond = finchConstants.getDistancePerSecond(wheelSpeed2Use)
  
   # Current position is the last one in the robotPositions array
@@ -133,8 +143,9 @@ while len(targetPosition) > 0:
       myRobot.setWheels(wheelSpeed2Use*wheelDirection,wheelSpeed2Use*wheelDirection,True)
       while True:
         timeMoving   = myRobot.getElapsedTime()
-        robotCanMove = myRobot.canMove()
-        logging.debug("finchMaze.py,  Looping till movement done, timeMoving:{0} robotCanMove:{1}".format(timeMoving,robotCanMove))
+        robotCanMove = myRobot.canMove(ignoreObstacles)
+        if LOGMOVEMENT or robotCanMove == False:
+          logging.debug("finchMaze.py,  Looping till movement done, timeMoving:{0} robotCanMove:{1}".format(timeMoving,robotCanMove))
         if timeMoving >= time2Target or robotCanMove == False:
           break
       myRobot.stop()
@@ -145,20 +156,24 @@ while len(targetPosition) > 0:
       currPos        = botUtils.whatsNewPositionAfterMovement(currPos,actualMovement)
       robotPositions.append(currPos)
 
-      logging.debug("finchMaze.py, time moved:{0}  time2Target was:{1}".format(timeMoving,time2Target))
+      logging.debug("finchMaze.py, time moved:{0}  time2Target was:{1} position: {2}".format(timeMoving,time2Target,str(currPos)))
 
       # If we didn't reach our target then we were unsuccessful
       if timeMoving < time2Target: 
         successfulMovements = False
         if correctingOurself == False: 
+          obstacleCount += 1
+          logging.info("finchMaze.py, correctingOurself, obstacleCount: {0}".format(obstacleCount))
           correctingOurself = True
           # We hit an obstacle... try fixing ourselvs
           # First we clear out all the remaining movements, we replace them with our correcing ones
           movementPosition = 0
           pathToUse.clear()
-          if myRobot.isObstacle(currPos,robotRegion):
+          logging.debug("currPos before isObstacle {0}".format(str(currPos)))
+          if myRobot.isObstacle(currPos,robotRegion) or obstacleCount > 1:
             # Have an obstacle, first call routine to check direction to move then call routine to 
             # get out of it's path
+            logging.debug("currPos after isObstacle {0}".format(str(currPos)))
             myRobot.setLedColor(finchConstants.RED)
             myRobot.checkAndSetObstacleDirectionToTry(currPos, robotRegion)
             pathToUse = myRobot.getOutOfObstacle(myRobot.getObstacleDirectionToTry())
@@ -175,6 +190,8 @@ while len(targetPosition) > 0:
   if successfulMovements == False:
     # We weren't successful, put the target back onto the stack
     targetPosition.append(nextTarget)
+  else:
+    obstacleCount = 0
 
 myRobot.shutDown()
 

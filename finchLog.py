@@ -73,7 +73,7 @@ offCenter = "L"
 while pythonUtils.isFloat(offCenter) == False:
   offCenter = input("Distance from center: ")
 
-outputStr = "EOF,TotalLength," + theLength + ",ElapsedTime," + str(totalElapsedTime) + ",OffsetFromAxis," + offCenter
+outputStr = "EOF,TotalLength," + str(theLength) + ",ElapsedTime," + str(totalElapsedTime) + ",OffsetFromAxis," + str(offCenter)
 fileHandle.write(outputStr)
 fileHandle.close()
 
