@@ -56,10 +56,10 @@ For SPACE I originally calculated that as 1/2 my robot's width but changed it to
 
 <li>Target
   <ol>
-    <li>Considerations: Our target is basically an x,y position that we want to get to, and an orientation to be at once there.  We also want to knock things over so we might want to change the speed and how the robot reacts to it sensors as we move.  Instead of having one target it's probably good to think of it as a sequence of targets; this way we can change how the robot acts during its journey.  I also noticed that the robot moves differently across the floor depending on where it is.. the tiles aren't even.</li>
+    <li>Considerations: Our target is basically an x,y position that we want to get to, and an orientation to be at once there.  We also want to knock things over so we might want to change the speed and how the robot reacts to its sensors as we move.  Instead of having one target it's probably good to think of it as a sequence of targets; this way we can change how the robot acts during its journey.  I also noticed that the robot moves differently across the floor depending on where it is.. the tiles aren't even.</li>
     <li>Representation: I use a tuple to represent an individual target location, format (x,y,orientation,speedToGetThere,ignoreObstacles).  I use a stack in the code that has a list of target locations</li>
-    <li>Calculation To: My solution considered three different 'path types' (ways) to get from current position to a target location... it could be X oriented (get to x pos first), Y oriented (get to y pos) or DIRECT (a straight line).  I wrote a generic routine (botUtils.calculateMovementToTarget) it uses the 'path type' (as an argument) to return a LIST of MOVEMENTS required to get from 'currentPosition' to 'targetPosition'.  Each movement is a TYPE, VALUE, the types are: FORWARD, BACKWARD or TURN and the values are scalars. (i.e. ("FORWARD",10),("TURN",45) means move forward for a distance of 10, then turn 45 degrees)</li>
-    <li>Algorithm: The program starts with a stack of target positions.  I tried describing this in a paragraph, but it wasn't clear, psuedo is probably the easiest:
+    <li>Calculation To: My solution considered three different 'path types' (ways) to get from current position to a target location... it could be X oriented (get to x pos first), Y oriented (get to y pos) or DIRECT (a straight line).  I wrote a generic routine (botUtils.calculateMovementToTarget) it uses the 'path type' (as an argument) to return a LIST of MOVEMENTS required to get from 'currentPosition' to 'targetPosition'.  Each movement is a TYPE, VALUE pair, the types are: FORWARD, BACKWARD or TURN and the values are scalars. (i.e. ("FORWARD",10),("TURN",45) means move forward for a distance of 10, then turn 45 degrees)</li>
+    <li>Algorithm: The program starts with a stack of target positions.  I tried describing this in a paragraph, but it wasn't clear.  Using pseudo is probably easier (this is high level to give you overal idea):
     <pre>
           while stackOfTargets isnt empty
              CURRENTTARGET <- stackOfTargets.pop()
@@ -81,13 +81,15 @@ For SPACE I originally calculated that as 1/2 my robot's width but changed it to
 <li>Time - Common issue on any software project; software can always be improved; but time is limited, eventually you have to settle with 'doing your best' in the time allotted.  This task project was no different :)</li>
 </ol>
 
+## Time spent
+I spent more time than I should have working on this (~50-60 hrs) but I learned a lot and have a new appreciation for the complexities of kinematics :)
 
 ## Disclaimer
 Like any coding project, it's never 100%; it can always be improved.  Given that project is due and future 'finch' development won't yield much value (I don't own
 a finch) I am stopping the 'finch' specific code.  I may continue on the 'general/utility' code, but my finch game has reached its 10th and final frame :)
 
 
-# Code
+# Code/files worth noting
 | Code | Description |
 | --------------- | ------------------------------- |
 | pythonUtils.py | Various utilities to help (i.e. isFloat()) |
