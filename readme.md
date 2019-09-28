@@ -34,9 +34,9 @@ The 'important' code is describe below, there's a lot of other stuff in the repo
 <ol>
 <li>Finch
   <ol>
-    <li>Analyze performance - wrote programs: **finchLog.py** to gather finch sensors; program **readFinchLog.py** reads log (or all log) files and outputs a .csv file.  The csv was brought into spreadsheet to analyze, look at the **LogResults*** file for examples.  The analysis allowed me to define entries in the **finchConstants.py** file to compensate for velocities in the wheels (i.e. had to have one wheel velocity at 0.324 and the other at 0.30 in order for finch to go in a straight line). Also derived trivial algorithm (in **finchConstants.py** (getDistancePerSecond)) to determine distance traveled per second at any given wheel velocity</li>
-    <li>Used analysis at 1.1 to determine velocity, updated single value in **finchConstants.py** </li>
-    <li>Used **finchLog.py** determine time to rotate 360 degrees left or 360 degrees right; created constant for each in **finchConstants.py**  Note: later wrote **finchSensorTest.py** to test sensors; look at both</li>
+    <li>Analyze performance - wrote programs: <strong>finchLog.py</strong> to gather finch sensors; program <strong>readFinchLog.py</strong> reads log (or all log) files and outputs a .csv file.  The csv was brought into spreadsheet to analyze, look at the <strong>LogResults</strong>* file for examples.  The analysis allowed me to define entries in the <strong>finchConstants.py</strong> file to compensate for velocities in the wheels (i.e. had to have one wheel velocity at 0.324 and the other at 0.30 in order for finch to go in a straight line). Also derived trivial algorithm (in <strong>finchConstants.py</strong> (getDistancePerSecond)) to determine distance traveled per second at any given wheel velocity</li>
+    <li>Used analysis at 1.1 to determine velocity, updated single value in <strong>finchConstants.py</strong> </li>
+    <li>Used <strong>finchLog.py</strong> determine time to rotate 360 degrees left or 360 degrees right; created constant for each in <strong>finchConstants.py</strong>  Note: later wrote <strong>finchSensorTest.py</strong> to test sensors; look at both</li>
     <li>For this project the temp and light sensors were unavailable (temp not meaningufl and couldn't use light (wasn't allowed to use a flashlight), so the only sensors available were the accelaration and obstacle sensors.  The acceleration didn't report any consistent tap/shake readings so I was left with obstacle sensor (infrared).</li>
     <li>While moving I was continually checking the obstacle sensors.  I kept a list of the last 5 sensor readings and used the average of those readings to determine the state of the sensor.  I also defined an constant (finchClass-OBSTACLE_READING_DELAY (set to .01 seconds)) to wait before setting the current obstacle state (strored in a dictionary struction)</li>
     <li>I defined a constants (LEFTPOLARITY, RIGHTPOLARITY) to represent polarity adjustment; if one wheel is going in the wrong direction set it's value to -1.0.  Method finchClass-wheelHelper uses this (and wheelAdjustment) to calculate wheel values.</li>
@@ -48,9 +48,9 @@ The 'important' code is describe below, there's a lot of other stuff in the repo
     <li>Sensor is positioned 1.5 inches in from the edge of the robot so there could be obstacle in front of the finch that it doesn't report.  IMO the finch would be better having the sensors out at it's edge (and another in center).  In terms of me solutioning this, I was thinking of having the finch 'LookAround' before moving... it could rotate left N', take an obstacle reading, do the same by checking in front, then checking to the right N'.  If an obstacle isn't reported then it could proceed.  I was going to implement this but suspect it would make movements very slow.... it could only move forward the distance of 'sensativity' (which is limited (i.e. inches)), have to stop take new readings and move again.</li>
   </ul></li>
 
-<li>Localization - The single sensor couldn't assist with localization (obstacles could be anywhere).  I developed code to keep track of my current position, it's represented internally as a tuple with (xPosition, yPosition, orientation (it's angle in degrees)).  I also have a tuple that repsents the **robots world** (it's bounds).. more on later. I wrote code that calculates my new position based my trajectory, time traveled and wheel speed.  There's quite a bit of code that managers this and instead of going into details take a look at the code in **botUtils.py**   fyi: It's in 'botUtils.py' since that's 'common' robot utilities, it's not related to a finch.</li>
+<li>Localization - The single sensor couldn't assist with localization (obstacles could be anywhere).  I developed code to keep track of my current position, it's represented internally as a tuple with (xPosition, yPosition, orientation (it's angle in degrees)).  I also have a tuple that repsents the <strong>robots world</strong> (it's bounds).. more on later. I wrote code that calculates my new position based my trajectory, time traveled and wheel speed.  There's quite a bit of code that managers this and instead of going into details take a look at the code in <strong>botUtils.py</strong>   fyi: It's in 'botUtils.py' since that's 'common' robot utilities, it's not related to a finch.</li>
 
-<li>Obstacles - Trying to figure out what to do when you hit an obstacle is challenging, the tail of the finch is long so if you're up against an obstacle on your right you're unable to turn left (the tail will hit obstacle).  With the shape of the finch you can however turn toward the obstacle and then backup.  This is what I did.  I also coded for two different types of obstacles... if only one obstacle sensor went off then I believed the finch was scraping an obstacle; it would reposition itself and turn a small angle away from it.  If both sensors triggered I would backup, move a toward a given DIRECTION for a given SPACE.  For DIRECTION - I take my current position and the **robots world** and see if I am against the edge of my world... if I am I set my direction accordingly.  For SPACE I originally calculated that as 1/2 my robot's width but changed it to be the width of the robot.  Overall it performed good but more could be done; see last bullet under **Single sensor**.</li>
+<li>Obstacles - Trying to figure out what to do when you hit an obstacle is challenging, the tail of the finch is long so if you're up against an obstacle on your right you're unable to turn left (the tail will hit obstacle).  With the shape of the finch you can however turn toward the obstacle and then backup.  This is what I did.  I also coded for two different types of obstacles... if only one obstacle sensor went off then I believed the finch was scraping an obstacle; it would reposition itself and turn a small angle away from it.  If both sensors triggered I would backup, move a toward a given DIRECTION for a given SPACE.  For DIRECTION - I take my current position and the <strong>robots world</strong> and see if I am against the edge of my world... if I am I set my direction accordingly.  For SPACE I originally calculated that as 1/2 my robot's width but changed it to be the width of the robot.  Overall it performed good but more could be done; see last bullet under <strong>Single sensor</strong>.</li>
 
 <li>Target
   <ol>
@@ -77,7 +77,7 @@ The 'important' code is describe below, there's a lot of other stuff in the repo
 <li>My knowledge - If I remembered 1/2 of what I've forgotten (linear algebra, geometry etc..) I'd be a genius :)  I am also a python newbie so that added it's own set of challenges.</li>
 
 <li>Time - Common issue on any software project; software can always be improved; but time is limited, eventually you have to settle with 'doing your best' in the time allotted.  This task project was no different :)</li>
-
+</ol>
 ## Disclaimer
 Like any coding project, it's never 100%; it can always be improved.  Given that project is due and future 'finch' developement won't yield much value (I don't own
 a finch) I am stopping the 'finch' specific code.  I may continue on the 'general/utility' code, but my finch game has reached it's 10th and final frame :)
@@ -160,18 +160,3 @@ Pseudo is:
         calculate new position
         haveObstacle <- obstacle status
 ```
-## When moving
-```
-  If rightSensor triggered and not left one 
-    " We're against right wall
-    positionToTry = LEFT
-    SCRAPE = true
-
-If leftSensor triggered and not right one
-  " We're against left wall
-  positionToTry = RIGHT
-  SCRAPE = true
-
-if both sensors triggered
-  OBSTACLE = true
-```  
