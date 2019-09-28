@@ -46,8 +46,8 @@ Pseudo is:
 | botUtils.py | Common robot utilities (calculate movements, angles, etc..) |
 | finchClass.py | Class to encapsulate the finch robot, has methods for movement, status ... |
 | finchConstants.py | Various constants to support finch, typically update this after analysis on finch (from readFinchLog.py) |
-| finchLog.py | Utility to log finch characteristics, mainly used for determining velocity and deviation off a straight line |
-| readFinchLog.py | Reads the log files created by finchLog.py and generates csv for analysis |
+| finchLog.py | Utility to log finch characteristics, mainly used for determining velocity and deviation off a straight line.  Use this program to calculate how the robot performs at different speeds, it writes the output to a file that can be processed by the program below |
+| readFinchLog.py | Reads the log files created by finchLog.py and generates csv for analysis.  You need this to determine wheel speed/deviation during movement |
 | finchMazeTest.py | Program to test the movements calculated to get to target locations.  It outputs the movements it'd make to console |
 | finchMaze.py | The program to move finch thru a maze; the program has stack of target points to move thru, it handles obstacles etc.. |
 

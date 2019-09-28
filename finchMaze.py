@@ -12,26 +12,29 @@ import sys
 from collections import deque
 
 LOGMOVEMENT = False
-STEPTHRU = True
+STEPTHRU = False
 
 # Get logger, for console want info messages. for file we want debug info
 mazeLogger = pythonUtils.getCustomLogger("finch",logging.INFO,logging.DEBUG,True)
 
-smallTest = False
+#testVersion = "EXAM"
+#testVersion = "HOME"
+testVersion = "SCHOOLSMALL"
+testVersion = "EXAM"
 
 # This a stack, it has our current target location and the speed
 # we should use to get there... it's a stack so targets are processed
 # from bottom up
 targetPosition = deque()
 
-if smallTest == False:
+if testVersion == "EXAM":
   targetPosition.append((88.0, 2.0, 0.0, finchConstants.MEDIUMSPEED, True))
   targetPosition.append((84.0, 10.0, 0.0, finchConstants.MEDIUMSPEED, True))
   targetPosition.append((78.0, 6.0, 0.0, finchConstants.TOPSPEED, True))
   targetPosition.append((69.0, 6.0, 0.0, finchConstants.MEDIUMSPEED, False))
   #targetPosition.append((68.0, 6.0, 0.0, finchConstants.MEDIUMSPEED, False)) 
   robotRegion = (0.0, -6.0, 96, 18)
-else:
+elif testVersion == "HOME":
   targetPosition.append((36.0, 22.0, 0.0, finchConstants.TOPSPEED, True))
   targetPosition.append((35.0, 22.0, 0.0, finchConstants.SLOWSPEED, False))
   targetPosition.append((24.0, 22.0, 0.0, finchConstants.SLOWSPEED, False))
@@ -40,6 +43,15 @@ else:
     robotRegion = (0.0,24.0,40,27)
   else:
     robotRegion = (0.0,-5.5,40,27)
+else:    
+  targetPosition.append((48.0, 4.0, 0.0, finchConstants.TOPSPEED, True))
+  targetPosition.append((46.0, 4.0, 0.0, finchConstants.TOPSPEED, False))
+  targetPosition.append((24.0, 4.0, 0.0, finchConstants.MEDIUMSPEED, False))
+  testLeftSide = False
+  if testLeftSide == True:
+    robotRegion = (0.0,3.0,60,-21.0)
+  else:
+    robotRegion = (0.0,-6.0,60,18)
   
 # This just tracks where we have been, we start at the origin
 robotPositions = []

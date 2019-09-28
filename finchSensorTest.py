@@ -91,7 +91,7 @@ def goAFoot(wheelSpeed2Use=0.4):
   myRobot.setWheels(wheelSpeed2Use,wheelSpeed2Use,True)
   while True:
     timeMoving   = myRobot.getElapsedTime()
-    robotCanMove = myRobot.canMove()
+    robotCanMove = myRobot.canMove(False)
     logging.debug("goAFoot: Looping, timeMoving:{0} robotCanMove:{1}".format(timeMoving,robotCanMove))
     if timeMoving >= time2Target or robotCanMove == False:
       break
