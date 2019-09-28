@@ -34,7 +34,7 @@ The 'important' code is describe below, there's a lot of other stuff in the repo
 <ol>
 <li>Finch
   <ol>
-    <li>Wheel speend inconsistency: Analyze performance - wrote programs: <strong>finchLog.py</strong> to gather finch sensors; program <strong>readFinchLog.py</strong> reads log (or all log) files and outputs a .csv file.  The csv was brought into spreadsheet to analyze, look at the <strong>LogResults</strong>* file for examples.  The analysis allowed me to define entries in the <strong>finchConstants.py</strong> file to compensate for velocities in the wheels (i.e. had to have one wheel velocity at 0.324 and the other at 0.30 in order for finch to go in a straight line). Also derived trivial algorithm (in <strong>finchConstants.py</strong> (getDistancePerSecond)) to determine distance traveled per second at any given wheel velocity</li>
+    <li>Wheel speed inconsistency: Analyze performance - wrote programs: <strong>finchLog.py</strong> to gather finch sensors; program <strong>readFinchLog.py</strong> reads log (or all log) files and outputs a .csv file.  The csv was brought into spreadsheet to analyze, look at the <strong>LogResults</strong>* file for examples.  The analysis allowed me to define entries in the <strong>finchConstants.py</strong> file to compensate for velocities in the wheels (i.e. had to have one wheel velocity at 0.324 and the other at 0.30 in order for finch to go in a straight line). Also derived trivial algorithm (in <strong>finchConstants.py</strong> (getDistancePerSecond)) to determine distance traveled per second at any given wheel velocity</li>
     <li>Surface friction: Used analysis at prior step to determine velocity, updated single value in <strong>finchConstants.py</strong> </li>
     <li>Calculate turning angle: Used <strong>finchLog.py</strong> determine time to rotate 360 degrees left or 360 degrees right; created constant for each in <strong>finchConstants.py</strong>  Note: later wrote <strong>finchSensorTest.py</strong> to test sensors; look at both</li>
     <li>Lack of sensors: For this project the temp and light sensors were unavailable (temp not meaningful and couldn't use light (wasn't allowed to use a flashlight), so the only sensors available were the accelaration and obstacle sensors.  The acceleration didn't report any consistent tap/shake readings so I was left with obstacle sensor (infrared).</li>
@@ -78,41 +78,11 @@ The 'important' code is describe below, there's a lot of other stuff in the repo
 
 <li>Time - Common issue on any software project; software can always be improved; but time is limited, eventually you have to settle with 'doing your best' in the time allotted.  This task project was no different :)</li>
 </ol>
+
+
 ## Disclaimer
 Like any coding project, it's never 100%; it can always be improved.  Given that project is due and future 'finch' developement won't yield much value (I don't own
 a finch) I am stopping the 'finch' specific code.  I may continue on the 'general/utility' code, but my finch game has reached it's 10th and final frame :)
-
-
-# Some design notes on movement
-The philosphy is to have a stack that represents the target position you want to get to.  We also
-have a list that keeps track of the robot positions.  The last element in the list reflects the
-current robot position.
-Pseudo is:
-  - ATTEMPTS = 0
-  - DIRECTION2TRY = LEFT
-  - while stack of target 
-    - pull TARGET off stack    
-    - get CURRENTPOS (last item in robot positions)
-    - calculate movements to get from CURRENTPOS to TARGET, it returns a list of movements to make
-    - CONTINUEMOVEMENTS <-- True
-    - ATTEMPTS ++ 
-    - while movements to make and CONTINUEMOVEMENTS
-      - make movement
-      - if failed making movement
-        - CONTINUEMOVEMENTS <- False
-        - if failed because brushing against up against obstacle
-          - backup, turn a little away from obstacle
-        - elseIf obstacle straight ahead of you
-          - try position 1/2 your width in direction of DIRECTION2TRY if you
-            are at wall there or outside boundry
-              DIRECTION2TRY <- !DIRECTION2TRY
-      - log your current position
-    - if CONTINUEMOVMENTS == False:
-      - push TARGET back on stack
-      - if ATTEMPTS >= SOMETHRESHOLD (maybe (2*obstacleWidth/(.5 robotWidth)))
-          FAILED, tried every combination
-    - else
-      - ATTEMPTS = 0
 
 
 # Code
@@ -126,37 +96,4 @@ Pseudo is:
 | readFinchLog.py | Reads the log files created by finchLog.py and generates csv for analysis.  You need this to determine wheel speed/deviation during movement |
 | finchMazeTest.py | Program to test the movements calculated to get to target locations.  It outputs the movements it'd make to console |
 | finchMaze.py | The program to move finch thru a maze; the program has stack of target points to move thru, it handles obstacles etc.. |
-
-
-## Logic for obstacle
-```
-  We keep track of the positionToTry (i.e. positionToTry = LEFT)
-  We know our width (BOTWIDTH)
-  We have different obstacles types (SCRAPE, OBSTACLE)
-  If we have a scrap we:
-    backup 1/2 BOTLENGTH
-    turn SCRAPEDEGREES away from wall
-    calculate new position
-    recalculate path to target and proceed as normal
-  If we have obstacle:
-    while haveObstacle and LOST == false:
-        triedAllAvailablesPositions = 0
-        rotate opposite position to try by 20 degrees
-        determine how much we need to backup
-        oppositeLen = 1/2 BOTWIDTH
-        hypotenuseLen = oppositeLen / sin(20)
-        adjacentLen = oppositeLen / tan(20)
-        move in reverse hypotenuseLen
-        if feelObstacle during backup 
-            # Reset values for movement
-            hypotenuseLen = lenYouActuallyTravelled
-            oppositeLen = hypotenuseLen * sin(20)
-            adjacentLen = oppositeLen / tan(20)
-            triedAllAvailablePositions ++
-            if triedAllAvailbePositions == 2:
-            LOST 
-        rotate 20 degrees toward position
-        moveForward adjacentLen
-        calculate new position
-        haveObstacle <- obstacle status
-```
+| finchSensorTest.py | Wrote this later to test sensors, follow on from logger... look at :) |

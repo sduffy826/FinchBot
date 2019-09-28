@@ -192,6 +192,8 @@ class MyRobot:
     else:
       return False
 
+  # Helper function, it returns the wheel speed taking into account what the
+  # wheel adjustment should be, and it's polarity.
   def wheelHelper(self, whichWheel, logModeOnly=False):
     # For logging we don't want to show the polarity adjustment... could be
     # confusing to people analyzing wheel motion :)
