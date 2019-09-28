@@ -28,6 +28,15 @@ The 'important' code is describe below, there's a lot of other stuff in the repo
 Like any coding project, it's never 100%; it can always be improved.  Given that project is due and future 'finch' developement won't yield much value (I don't own
 a finch) I am stopping the 'finch' specific code.  I may continue on the 'general/utility' code, but my finch game has reached it's 10th and final frame :)
 
+<ol>
+  <li>List 1</li>
+  <li>List 2</li>
+  <ol>
+    <li>sublist</li>
+    <li>sublist2</li>
+  </ol>
+</ol>
+
 ## Addressing Challenges Above
 1. Finch
     1.1 Analyze performance - wrote programs: **finchLog.py** to gather finch sensors; program **readFinchLog.py** reads log (or all log) files and outputs a .csv file.  The csv was brought into spreadsheet to analyze, look at the **LogResults*** file for examples.  The analysis allowed me to define entries in the **finchConstants.py** file to compensate for velocities in the wheels (i.e. had to have one wheel velocity at 0.324 and the other at 0.30 in order for finch to go in a straight line). Also derived trivial algorithm (in **finchConstants.py** (getDistancePerSecond)) to determine distance traveled per second at any given wheel velocity 
