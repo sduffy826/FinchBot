@@ -124,15 +124,8 @@ while ans != 'q':
     obstacleAvoidMovement(lastDirection)
   elif ans == "s":
     roboStat()
-  elif ans is "j":
-    myRobot.left()
-  elif ans is "k":
-    myRobot.right()
-  elif ans is "i":         
-    myRobot.faster()
   elif ans is "l":
     rotate(finchConstants.LEFT, 360)
-    # myRobot.stop()
   elif ans is "r":
     rotate(finchConstants.RIGHT, 360)
   elif ans is "p":
@@ -142,6 +135,13 @@ while ans != 'q':
   elif ans is "c":
     theColor += 1
     setColor(theColor)
+  # Easter eggs below :)    
+  elif ans is "j":
+    myRobot.left()
+  elif ans is "k":
+    myRobot.right()
+  elif ans is "i":         
+    myRobot.faster()
   elif ans is "u":
     myRobot.run()
 
